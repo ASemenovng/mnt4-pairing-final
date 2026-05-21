@@ -62,13 +62,13 @@
     "w0_digest": "0xf6a4c21838db987a8081b9ff63c28461c2949c670d57b4b38ad73cae8b045b64",
     "final_digest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d"
   },
-  "generation_time_ms": 417,
+  "generation_time_ms": 409,
   "timings": {
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 184,
-    "miller_trace_generation_ms": 213,
+    "line_cache_generation_ms": 174,
+    "miller_trace_generation_ms": 215,
     "final_exponentiation_ms": 18,
     "proof_input_generation_ms": 0,
-    "total_generation_ms": 417
+    "total_generation_ms": 409
   }
 }

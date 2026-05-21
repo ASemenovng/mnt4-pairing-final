@@ -25,6 +25,7 @@ RUST_OUT = CACHE / "rust_backend_smoke"
 SUMMARY_JSON = CACHE / "release_summary.json"
 REPORT_MD = ROOT / "FINAL_MNT4_PAIRING_RELEASE_REPORT.md"
 RUST_REQUEST = CACHE / "parametric_q_request.json"
+MNT_CYCLE_REPORT = ROOT / "cache" / "mnt_cycle_constraints" / "MNT_CYCLE_CONSTRAINTS_REPORT.md"
 
 
 def snarkjs_bin() -> str:
@@ -58,6 +59,24 @@ def parse_r1cs_info(text: str) -> dict[str, int]:
         "private_inputs": r"# of Private Inputs:\s*(\d+)",
         "public_inputs": r"# of Public Inputs:\s*(\d+)",
         "labels": r"# of Labels:\s*(\d+)",
+    }
+    for key, pattern in patterns.items():
+        m = re.search(pattern, text)
+        if m:
+            out[key] = int(m.group(1))
+    return out
+
+
+def parse_mnt_cycle_report(text: str) -> dict[str, int]:
+    out: dict[str, int] = {}
+    patterns = {
+        "native_prepared_residue_constraints": r"MNT-native prepared/residue relation model \| (\d+) \|",
+        "native_direct_fe_reference_constraints": r"MNT-native model with direct FE reference \| (\d+) \|",
+        "bn254_emulated_pairing_reference_constraints": r"BN254 emulated pairing reference \| (\d+) \|",
+        "sonobe_decider_reference_constraints": r"Sonobe-like Ethereum decider reference \| (\d+) \|",
+        "miller_transition_constraints": r"Miller transition relation, .* \| (\d+) \|",
+        "line_cache_relation_constraints": r"Line-cache relation \| (\d+) \|",
+        "final_exponentiation_residue_constraints": r"Final exponentiation residue relation, .* \| (\d+) \|",
     }
     for key, pattern in patterns.items():
         m = re.search(pattern, text)
@@ -114,6 +133,12 @@ def main() -> int:
     r1cs_stdout, _ = run([snarkjs_bin(), "r1cs", "info", "zk/stage6_groth16/stage6_single_strict.r1cs"], timeout=30)
     constraints = parse_r1cs_info(r1cs_stdout)
 
+    _, mnt_cycle_report_ms = run([
+        "cargo", "run", "--offline", "--manifest-path", "crates/mnt_cycle_constraints/Cargo.toml", "--",
+        "--out", str(MNT_CYCLE_REPORT),
+    ], timeout=60)
+    mnt_cycle_constraints = parse_mnt_cycle_report(MNT_CYCLE_REPORT.read_text())
+
     gas_stdout, gas_ms = run(["forge", "test", "--offline", "--match-path", "test/final_mnt4_pairing/*", "--gas-report"], timeout=240)
     (CACHE / "forge_final_gas_report.log").write_text(gas_stdout)
 
@@ -135,6 +160,10 @@ def main() -> int:
             "transcriptHash": proof_json["transcriptHash"],
         },
         "circuit": constraints,
+        "mnt_cycle_constraints": {
+            "report_generation_ms": mnt_cycle_report_ms,
+            **mnt_cycle_constraints,
+        },
         "gas": parse_test_gas(gas_stdout),
         "artifacts": {
             "rust_output_dir": str(RUST_OUT.relative_to(ROOT)),
@@ -173,6 +202,19 @@ def main() -> int:
 | Private inputs | {constraints.get('private_inputs', 'n/a')} |
 | Размер proof, bytes | {summary['proof']['proof_bytes']} |
 
+Важно: эти circuit-метрики относятся к compact BN254 verifier-envelope, а не к полному доказательству MNT4-сопряжения. Для оценки будущего MNT-native/folding слоя используется отдельный отчет `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.
+
+## Метрики MNT-cycle native relation model
+
+| Измерение | Constraints |
+|---|---:|
+| Miller transition relation | {summary['mnt_cycle_constraints'].get('miller_transition_constraints', 'n/a')} |
+| Line-cache relation | {summary['mnt_cycle_constraints'].get('line_cache_relation_constraints', 'n/a')} |
+| Final exponentiation residue relation | {summary['mnt_cycle_constraints'].get('final_exponentiation_residue_constraints', 'n/a')} |
+| MNT-native prepared/residue model total | {summary['mnt_cycle_constraints'].get('native_prepared_residue_constraints', 'n/a')} |
+| BN254 emulated pairing reference | {summary['mnt_cycle_constraints'].get('bn254_emulated_pairing_reference_constraints', 'n/a')} |
+| Sonobe-like decider reference | {summary['mnt_cycle_constraints'].get('sonobe_decider_reference_constraints', 'n/a')} |
+
 ## Метрики Rust off-chain backend
 
 | Этап | Время, ms |
@@ -205,7 +247,8 @@ python3 script/final_mnt4_pairing_release.py
 - `{summary['artifacts']['rust_output_dir']}`;
 - `{summary['artifacts']['proof_fixture']}`;
 - `{summary['artifacts']['gas_log']}`;
-- `cache/final_mnt4_pairing/release_summary.json`.
+- `cache/final_mnt4_pairing/release_summary.json`;
+- `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.
 """)
     print(json.dumps(summary, indent=2, ensure_ascii=False))
     return 0

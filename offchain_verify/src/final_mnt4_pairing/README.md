@@ -49,3 +49,9 @@ R1CS metadata, runs Foundry tests with `--gas-report`, and writes:
 - `cache/final_mnt4_pairing/release_summary.json`;
 - `cache/final_mnt4_pairing/forge_final_gas_report.log`;
 - `FINAL_MNT4_PAIRING_RELEASE_REPORT.md`.
+
+## What the current proof checker proves
+
+The public Solidity API is final in the sense of interface shape: callers submit MNT4 points, a claimed result digest, artifact commitments and a proof. The proof checker verifies the compact BN254 proof and the verifier contract binds proof public inputs to the submitted statement.
+
+This layer is not intended to be the full MNT4 arithmetic proof. The full arithmetic/relation work is represented by the Rust backend and by the MNT-cycle native relation accounting crate. In the final dissertation text, the 1538-constraint BN254 circuit should be described as a compact verifier envelope, not as the cost of proving the complete MNT4 pairing computation.

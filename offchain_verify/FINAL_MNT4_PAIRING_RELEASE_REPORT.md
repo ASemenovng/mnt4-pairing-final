@@ -25,16 +25,29 @@
 | Private inputs | 392 |
 | Размер proof, bytes | 256 |
 
+Важно: эти circuit-метрики относятся к compact BN254 verifier-envelope, а не к полному доказательству MNT4-сопряжения. Для оценки будущего MNT-native/folding слоя используется отдельный отчет `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.
+
+## Метрики MNT-cycle native relation model
+
+| Измерение | Constraints |
+|---|---:|
+| Miller transition relation | 4514 |
+| Line-cache relation | 19554 |
+| Final exponentiation residue relation | 110 |
+| MNT-native prepared/residue model total | 24178 |
+| BN254 emulated pairing reference | 1393318 |
+| Sonobe-like decider reference | 9000000 |
+
 ## Метрики Rust off-chain backend
 
 | Этап | Время, ms |
 |---|---:|
-| Генерация line cache | 184 |
-| Генерация Miller trace | 213 |
+| Генерация line cache | 174 |
+| Генерация Miller trace | 215 |
 | Final exponentiation | 18 |
 | Генерация proof input | 0 |
-| Total reported generation | 417 |
-| Wall time Rust-команды | 10724 |
+| Total reported generation | 409 |
+| Wall time Rust-команды | 876 |
 
 ## Проверки корректности
 
@@ -57,4 +70,5 @@ python3 script/final_mnt4_pairing_release.py
 - `cache/final_mnt4_pairing/rust_backend_smoke`;
 - `cache/final_mnt4_pairing/final_single_real_proof.json`;
 - `cache/final_mnt4_pairing/forge_final_gas_report.log`;
-- `cache/final_mnt4_pairing/release_summary.json`.
+- `cache/final_mnt4_pairing/release_summary.json`;
+- `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.

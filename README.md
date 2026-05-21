@@ -36,3 +36,17 @@ The main public contract for deployment is:
 ```text
 offchain_verify/src/final_mnt4_pairing/MNT4PairingFinal.sol
 ```
+
+## Current proof-status boundary
+
+The final EVM-facing verifier is intentionally compact. It verifies a BN254 proof because Ethereum has efficient BN254 precompiles, but this does not mean that the current BN254 circuit replays the entire MNT4-753 pairing computation.
+
+The current deployed contour should be read as:
+
+```text
+Rust MNT4 backend -> prepared public inputs/artifacts -> compact BN254 proof -> Solidity verifier
+```
+
+The BN254 proof binds the submitted statement, result digest and artifact commitments. The expensive MNT4 arithmetic is performed by the Rust backend and checked against arkworks/reference vectors. The next research layer is the MNT-cycle native relation layer, implemented under `offchain_verify/crates/mnt_cycle_constraints`, which measures the relation that should later be folded over the MNT4/MNT6 cycle.
+
+Therefore, the small BN254 circuit size must not be quoted as the cost of a full non-native MNT4 pairing proof. It is the cost of the current EVM-compatible verification envelope.

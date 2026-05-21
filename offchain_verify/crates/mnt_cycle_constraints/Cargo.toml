@@ -1,0 +1,14 @@
+[package]
+name = "mnt_cycle_constraints"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+name = "mnt_cycle_constraints"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mnt-cycle-constraints-report"
+path = "src/main.rs"

@@ -27,10 +27,10 @@
     "timings": {
       "final_exponentiation_ms": 18,
       "input_normalization_ms": 0,
-      "line_cache_generation_ms": 184,
-      "miller_trace_generation_ms": 213,
+      "line_cache_generation_ms": 174,
+      "miller_trace_generation_ms": 215,
       "proof_input_generation_ms": 0,
-      "total_generation_ms": 417
+      "total_generation_ms": 409
     }
   },
   "public": {
