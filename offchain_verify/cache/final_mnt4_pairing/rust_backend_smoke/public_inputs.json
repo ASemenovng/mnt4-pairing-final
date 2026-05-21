@@ -1,0 +1,30 @@
+{
+  "coeffCommitment": "0xdc70fe833c6bd71c7b8144166e9b94c3393a4d37a52b1497fc3e34180a3cd843",
+  "context": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "epoch": 1,
+  "finalExpSegments": 5,
+  "fixedQId": null,
+  "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+  "millerRounds": 376,
+  "mode": "parametric_q",
+  "nonce": 0,
+  "pairMillerDigests": [
+    "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
+  ],
+  "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+  "pairs": 1,
+  "pointsHash": "0xa853d1c8b8679e23cd305235b91951dd6cca2db02227336cb15cb7ffe2348858",
+  "qHash": "0x6b2368d6280cd7d2aff79fdd38c011f62151009f1c0266c453a4da2bd5b3bda7",
+  "singlesDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+  "timings": {
+    "final_exponentiation_ms": 18,
+    "input_normalization_ms": 0,
+    "line_cache_generation_ms": 184,
+    "miller_trace_generation_ms": 213,
+    "proof_input_generation_ms": 0,
+    "total_generation_ms": 417
+  },
+  "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47",
+  "transitionRoot": "0xeeb82b8a18a570bfe0e127698860ce15b788161204f7d9b75e047b59693459ac",
+  "validUntil": 0
+}

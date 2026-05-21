@@ -1,0 +1,63 @@
+{
+  "rust_backend": {
+    "command_ms": 10724,
+    "reported_timings": {
+      "final_exponentiation_ms": 18,
+      "input_normalization_ms": 0,
+      "line_cache_generation_ms": 184,
+      "miller_trace_generation_ms": 213,
+      "proof_input_generation_ms": 0,
+      "total_generation_ms": 417
+    },
+    "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+    "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+    "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47"
+  },
+  "proof": {
+    "generation_command_ms": 485,
+    "proof_bytes": 256,
+    "public_inputs": 19,
+    "claimedPairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+    "resultDigestFr": "0x186671d0d7ca3bd7df0b458fc74b59ba64167bafec72ae6164cb06397f1c832b",
+    "artifactRoot": "0x138cf5d3857bcbe91bf01ee1a35307e0c1c508d3d40087b8bf45ae0744a5057c",
+    "transcriptHash": "0x1307e5072d48a21ae04ecc9818a6baa8ff041821f060440a53960c615c5f09ef"
+  },
+  "circuit": {
+    "wires": 1560,
+    "constraints": 1538,
+    "private_inputs": 392,
+    "public_inputs": 19,
+    "labels": 1567
+  },
+  "gas": {
+    "testVerifyMultiPairingAcceptsBoundStatement": 37134,
+    "testVerifyMultiPairingRejectsLengthMismatch": 15003,
+    "testVerifyMultiPairingRejectsTooManyPairs": 38378,
+    "testVerifySinglePairingAcceptsBoundStatement": 22003,
+    "testVerifySinglePairingRejectsBadLineCommitment": 13454,
+    "testVerifySinglePairingRejectsTamperedResult": 27164,
+    "testNeutralCheckerBindsStatementHash": 336102,
+    "testNeutralCheckerRejectsTamperedSignal": 325321,
+    "testRealProofFixtureVerifiesThroughNeutralChecker": 325283,
+    "testFinalMainContractRejectsTamperedFinalExponentiationCommitment": 25164,
+    "testFinalMainContractRejectsTamperedLineCommitment": 24329,
+    "testFinalMainContractRejectsTamperedMillerTraceCommitment": 25150,
+    "testFinalMainContractRejectsTamperedPoint": 25142,
+    "testFinalMainContractRejectsTamperedQ": 26005,
+    "testFinalMainContractRejectsTamperedResultDigest": 24055,
+    "testFinalMainContractVerifiesRealProofEnvelope": 343435,
+    "testEmptyInputReturnsTrueInBothPaths": 145937,
+    "testSingleValidGeneratorPairReturnsSameBoolean": 2006992,
+    "testFinalFolderFpArithmeticMatchesArkworks": 2913414,
+    "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
+    "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
+    "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
+    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1957673,
+    "testFuzzWrapperMatchesRawPrecompileBoolean_median": 2009879
+  },
+  "artifacts": {
+    "rust_output_dir": "cache/final_mnt4_pairing/rust_backend_smoke",
+    "proof_fixture": "cache/final_mnt4_pairing/final_single_real_proof.json",
+    "gas_log": "cache/final_mnt4_pairing/forge_final_gas_report.log"
+  }
+}

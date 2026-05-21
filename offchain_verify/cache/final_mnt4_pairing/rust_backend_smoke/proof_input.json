@@ -1,0 +1,49 @@
+{
+  "note": "Rust backend output consumed directly by the final prepared-residue proof generator.",
+  "privateWitness": {
+    "feChunks": {
+      "final_digest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+      "final_out0": "0x437980f8a15bec12123a94d60a0e1b9bce5348195749df3245eb65bda6aabba7",
+      "first_chunk_digest": "0xe2e2b7cb09257beec6020aa67330a0bef91233cb54cb0f42fc7962bf7e069e17",
+      "first_chunk_inv_digest": "0x8608c0e518b85932e5935e7863ae9672bfc1a440e4b74d5617d98b3208a47c04",
+      "first_chunk_out0": "0x06830a1d7607c3854b61e5d1c3323e90447e39f6fdcb574288bf28a362e9821c",
+      "inv_digest": "0xe3eaf34a1e4624a2b012dd2980aa8ed29e2979e9f93e3cbf02666ed3ed5aa5a2",
+      "inv_out0": "0x440ca2d8bd4bf92c05da2abf13678c722ef5d239febba96ec48c34817b24b910",
+      "w0_digest": "0xf6a4c21838db987a8081b9ff63c28461c2949c670d57b4b38ad73cae8b045b64",
+      "w0_out0": "0xcfda881258f589782296662a64ddd088d55d20e6c90ab9c492d6f6a990dcca4f",
+      "w1_digest": "0x5dd75c84f1c53c511ff2bdcb1e1e304d2373a0a7505566e99d1c943dc89a997a",
+      "w1_out0": "0x06830a1d7607c3854b61e5d1c3323e90447e39f6fdcb574288bf28a362e9821c"
+    },
+    "lineCommitments": {
+      "add_line_commitment": "0xa06c68cea868049c9559bdaedc1b40a090f6161c1a47190b024aa199d6b6d71d",
+      "coeff_commitment": "0xdc70fe833c6bd71c7b8144166e9b94c3393a4d37a52b1497fc3e34180a3cd843",
+      "dbl_line_commitment": "0x288ded9d5a49d4a5fce95a3c0d240d128c6e1470a9bb99b8e2fa8390596e4b4c"
+    },
+    "millerOut00": "0x054116151d0190c3f35d22f1885bd5a299f0e91af816be581fd1b1ccaf640153",
+    "millerOut11": "0x1491b73df47d86e5643f95b1f8bb0d473f9596c83b54f3733f773626117045ea",
+    "pairMillerDigests": [
+      "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
+    ],
+    "timings": {
+      "final_exponentiation_ms": 18,
+      "input_normalization_ms": 0,
+      "line_cache_generation_ms": 184,
+      "miller_trace_generation_ms": 213,
+      "proof_input_generation_ms": 0,
+      "total_generation_ms": 417
+    }
+  },
+  "public": {
+    "coeffCommitment": "0xdc70fe833c6bd71c7b8144166e9b94c3393a4d37a52b1497fc3e34180a3cd843",
+    "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+    "pairMillerDigests": [
+      "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
+    ],
+    "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+    "pointsHash": "0xa853d1c8b8679e23cd305235b91951dd6cca2db02227336cb15cb7ffe2348858",
+    "qHash": "0x6b2368d6280cd7d2aff79fdd38c011f62151009f1c0266c453a4da2bd5b3bda7",
+    "singlesDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+    "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47",
+    "transitionRoot": "0xeeb82b8a18a570bfe0e127698860ce15b788161204f7d9b75e047b59693459ac"
+  }
+}

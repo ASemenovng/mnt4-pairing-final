@@ -1,0 +1,8 @@
+**/out/
+**/target/
+**/node_modules/
+.DS_Store
+
+# Foundry local compiler cache
+**/cache/solidity-files-cache.json
+**/cache/test-failures/

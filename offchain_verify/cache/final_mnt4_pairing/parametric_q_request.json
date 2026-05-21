@@ -1,0 +1,10 @@
+{
+  "mode": "parametric_q",
+  "points": [],
+  "q": null,
+  "context": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "epoch": 1,
+  "nonce": 0,
+  "valid_until": 0,
+  "fixed_q_id": null
+}
