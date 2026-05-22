@@ -280,3 +280,27 @@ fn final_exponentiation_residue_relation_rejects_tampered_final_digest() {
     let err = mnt4_trace_backend::validate_final_exponentiation_relation(&request, &relation).unwrap_err();
     assert!(err.contains("final_digest"));
 }
+
+#[test]
+fn backend_embeds_compiled_native_relation_summary() {
+    let artifact = build_default_fixed_q_artifact(DEFAULT_CONTEXT_HEX, 1, 41).unwrap();
+    assert!(artifact.native_relation.is_satisfied);
+    assert!(artifact.native_relation.constraints > artifact.native_relation.estimated_constraints);
+    assert!(artifact.native_relation.constraints < artifact.native_relation.bn254_emulated_pairing_reference_constraints);
+    assert_eq!(artifact.native_relation.public_inputs, 3);
+    assert_eq!(artifact.native_relation.line_cache_relation_root, artifact.line_cache_relation.relation_root);
+    assert_eq!(artifact.native_relation.miller_relation_root, artifact.miller_relation.relation_root);
+    assert_eq!(artifact.native_relation.final_exponentiation_relation_root, artifact.final_exponentiation_relation.relation_root);
+}
+
+#[test]
+fn writer_emits_native_relation_into_proof_input() {
+    let artifact = build_default_fixed_q_artifact(DEFAULT_CONTEXT_HEX, 1, 42).unwrap();
+    let mut out = std::env::temp_dir();
+    out.push(format!("mnt4_trace_native_relation_test_{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&out);
+    write_artifacts(&out, &artifact).unwrap();
+    let proof_input = std::fs::read_to_string(out.join("proof_input.json")).unwrap();
+    assert!(proof_input.contains("nativeRelation"));
+    assert!(proof_input.contains("compiledMntNativeRelation"));
+}

@@ -6,6 +6,7 @@ use ark_mnt4_753::{
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path, time::Instant};
 use tiny_keccak::{Hasher, Keccak};
+use mnt_cycle_constraints::{compile_prepared_relation_from_hex_roots, comparison_estimate};
 
 pub const DEFAULT_CONTEXT_HEX: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -108,6 +109,26 @@ pub struct FinalExponentiationRelation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NativeRelationSummary {
+    pub kind: String,
+    pub line_cache_relation_root: String,
+    pub miller_relation_root: String,
+    pub final_exponentiation_relation_root: String,
+    pub constraints: u64,
+    pub estimated_constraints: u64,
+    pub public_inputs: u64,
+    pub witness_variables: u64,
+    pub pairs: u64,
+    pub line_cache_constraints: u64,
+    pub miller_constraints: u64,
+    pub fe_residue_constraints: u64,
+    pub root_binding_constraints: u64,
+    pub is_satisfied: bool,
+    pub bn254_emulated_pairing_reference_constraints: u64,
+    pub sonobe_decider_reference_constraints: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeChunks {
     pub inv_out0: String,
     pub first_chunk_out0: String,
@@ -148,6 +169,7 @@ pub struct PairingArtifact {
     pub line_cache_relation: LineCacheRelation,
     pub miller_relation: MillerRelation,
     pub final_exponentiation_relation: FinalExponentiationRelation,
+    pub native_relation: NativeRelationSummary,
     pub pairing_digest: String,
     pub miller_digest: String,
     pub singles_digest: String,
@@ -300,6 +322,12 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         &miller_digest,
         &fe_chunks,
     )?;
+    let native_relation = build_native_relation_summary(
+        &line_cache_relation,
+        &miller_relation,
+        &final_exponentiation_relation,
+        pairs,
+    )?;
     let context = parse_bytes32(&request.context)?;
     let transition_root = keccak(&abi_encode_words(&[
         hex_to_word(&miller_digest)?,
@@ -344,6 +372,7 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         line_cache_relation,
         miller_relation,
         final_exponentiation_relation,
+        native_relation,
         pairing_digest,
         miller_digest,
         singles_digest,
@@ -617,6 +646,39 @@ fn final_exponentiation_relation_root(
     ])))
 }
 
+fn build_native_relation_summary(
+    line_cache_relation: &LineCacheRelation,
+    miller_relation: &MillerRelation,
+    final_relation: &FinalExponentiationRelation,
+    pairs: u64,
+) -> Result<NativeRelationSummary, String> {
+    let compiled = compile_prepared_relation_from_hex_roots(
+        &line_cache_relation.relation_root,
+        &miller_relation.relation_root,
+        &final_relation.relation_root,
+        pairs,
+    )?;
+    let cmp = comparison_estimate();
+    Ok(NativeRelationSummary {
+        kind: "compiledMntNativeRelation".to_string(),
+        line_cache_relation_root: line_cache_relation.relation_root.clone(),
+        miller_relation_root: miller_relation.relation_root.clone(),
+        final_exponentiation_relation_root: final_relation.relation_root.clone(),
+        constraints: compiled.constraints,
+        estimated_constraints: compiled.estimated_constraints,
+        public_inputs: compiled.public_inputs,
+        witness_variables: compiled.witness_variables,
+        pairs: compiled.pairs,
+        line_cache_constraints: compiled.line_cache_constraints,
+        miller_constraints: compiled.miller_constraints,
+        fe_residue_constraints: compiled.fe_residue_constraints,
+        root_binding_constraints: compiled.root_binding_constraints,
+        is_satisfied: compiled.is_satisfied,
+        bn254_emulated_pairing_reference_constraints: cmp.bn254_emulated_pairing_reference,
+        sonobe_decider_reference_constraints: cmp.sonobe_decider_reference,
+    })
+}
+
 pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(), String> {
     fs::create_dir_all(out_dir).map_err(|e| e.to_string())?;
     write_json(out_dir.join("trace.json"), artifact)?;
@@ -631,6 +693,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "lineCacheRelation": artifact.line_cache_relation,
             "millerRelation": artifact.miller_relation,
             "finalExponentiationRelation": artifact.final_exponentiation_relation,
+            "nativeRelation": artifact.native_relation,
             "timings": artifact.timings,
         }),
     )?;
@@ -650,6 +713,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
             "millerRelationRoot": artifact.miller_relation.relation_root,
             "finalExponentiationRelationRoot": artifact.final_exponentiation_relation.relation_root,
+            "nativeRelation": artifact.native_relation,
             "pairingDigest": artifact.pairing_digest,
             "millerDigest": artifact.miller_digest,
             "singlesDigest": artifact.singles_digest,
@@ -675,6 +739,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
                 "millerRelationRoot": artifact.miller_relation.relation_root,
                 "finalExponentiationRelationRoot": artifact.final_exponentiation_relation.relation_root,
+                "nativeRelationConstraints": artifact.native_relation.constraints,
                 "qHash": artifact.q_hash,
                 "pointsHash": artifact.points_hash,
             },
@@ -686,6 +751,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "lineCacheRelation": artifact.line_cache_relation,
                 "millerRelation": artifact.miller_relation,
                 "finalExponentiationRelation": artifact.final_exponentiation_relation,
+                "nativeRelation": artifact.native_relation,
                 "feChunks": artifact.fe_chunks,
                 "timings": artifact.timings,
             },
