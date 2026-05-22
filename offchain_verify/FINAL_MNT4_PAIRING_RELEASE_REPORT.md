@@ -44,12 +44,12 @@
 
 | Этап | Время, ms |
 |---|---:|
-| Генерация line cache | 176 |
-| Генерация Miller trace | 211 |
-| Final exponentiation | 18 |
+| Генерация line cache | 172 |
+| Генерация Miller trace | 212 |
+| Final exponentiation | 19 |
 | Генерация proof input | 0 |
-| Total reported generation | 407 |
-| Wall time Rust-команды | 811 |
+| Total reported generation | 405 |
+| Wall time Rust-команды | 810 |
 
 ## Проверки корректности
 

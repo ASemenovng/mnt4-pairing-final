@@ -111,6 +111,32 @@ impl Default for RelationCostModel {
 }
 
 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FinalExponentiationResidueBreakdown {
+    pub residue_segments: u64,
+    pub residue_constraints: u64,
+    pub direct_chain_steps: u64,
+    pub direct_chain_constraints: u64,
+    pub saved_constraints: u64,
+}
+
+pub fn final_exponentiation_residue_breakdown(
+    model: RelationCostModel,
+    residue_segments: u64,
+    direct_chain_steps: u64,
+) -> FinalExponentiationResidueBreakdown {
+    let residue_constraints = residue_segments * model.fe_residue_segment;
+    let direct_chain_constraints = direct_chain_steps * model.fe_direct_step;
+    FinalExponentiationResidueBreakdown {
+        residue_segments,
+        residue_constraints,
+        direct_chain_steps,
+        direct_chain_constraints,
+        saved_constraints: direct_chain_constraints.saturating_sub(residue_constraints),
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MillerRelationBreakdown {
     pub pairs: u64,
@@ -191,10 +217,11 @@ pub fn estimate_pairing_relation(
     let sparse_line_mul_per_round = model.tower.fq4_sparse_line_mul;
     let miller_transition_constraints = miller_relation_breakdown(model, miller_rounds, addition_steps, 1).total_constraints;
     let line_cache_constraints = line_cache_relation_breakdown(model, miller_rounds, addition_steps).total_constraints;
-    let fe_residue_constraints = 5 * model.fe_residue_segment;
+    let fe_breakdown = final_exponentiation_residue_breakdown(model, 5, 753);
+    let fe_residue_constraints = fe_breakdown.residue_constraints;
     // A conservative lower-complexity reference for a direct FE chain with 753 hard-part steps.
     // It is intentionally not used as the implementation target.
-    let direct_fe_reference_constraints = 753 * model.fe_direct_step;
+    let direct_fe_reference_constraints = fe_breakdown.direct_chain_constraints;
     let total_prepared_residue_constraints =
         miller_transition_constraints + line_cache_constraints + fe_residue_constraints;
     PairingRelationEstimate {
@@ -253,6 +280,7 @@ pub fn render_markdown_report() -> String {
     writeln!(out, "| Fq4 multiplication | {} |", tower.fq4_mul).unwrap();
     writeln!(out, "| Fq4 square | {} |", tower.fq4_sqr).unwrap();
     writeln!(out, "| Fq4 sparse line multiplication | {} |", tower.fq4_sparse_line_mul).unwrap();
+    let fe_breakdown = final_exponentiation_residue_breakdown(model, 5, 753);
     let line_breakdown = line_cache_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS);
     let miller_single = miller_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS, 1);
     let miller_multi2 = miller_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS, 2);
@@ -270,6 +298,12 @@ pub fn render_markdown_report() -> String {
     writeln!(out, "| Addition-line consistency checks, {} steps | {} |", line_breakdown.addition_steps, line_breakdown.addition_line_constraints).unwrap();
     writeln!(out, "| Commitment binding, public hash equality only | {} |", line_breakdown.commitment_binding_constraints).unwrap();
     writeln!(out, "| Total line-cache relation | {} |", line_breakdown.total_constraints).unwrap();
+    writeln!(out, "\n## Final exponentiation relation comparison\n").unwrap();
+    writeln!(out, "| Model | Constraints |").unwrap();
+    writeln!(out, "|---|---:|").unwrap();
+    writeln!(out, "| Direct final exponentiation chain, {} steps | {} |", fe_breakdown.direct_chain_steps, fe_breakdown.direct_chain_constraints).unwrap();
+    writeln!(out, "| Residue/relation check, {} segments | {} |", fe_breakdown.residue_segments, fe_breakdown.residue_constraints).unwrap();
+    writeln!(out, "| Saved constraints in the model | {} |", fe_breakdown.saved_constraints).unwrap();
     writeln!(out, "\n## Prepared pairing relation estimate\n").unwrap();
     writeln!(out, "| Component | Constraints |").unwrap();
     writeln!(out, "|---|---:|").unwrap();

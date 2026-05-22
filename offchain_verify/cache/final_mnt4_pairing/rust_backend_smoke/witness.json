@@ -12,6 +12,19 @@
     "w1_digest": "0x5dd75c84f1c53c511ff2bdcb1e1e304d2373a0a7505566e99d1c943dc89a997a",
     "w1_out0": "0x06830a1d7607c3854b61e5d1c3323e90447e39f6fdcb574288bf28a362e9821c"
   },
+  "finalExponentiationRelation": {
+    "direct_chain_reference_steps": 753,
+    "final_digest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
+    "first_chunk_digest": "0xe2e2b7cb09257beec6020aa67330a0bef91233cb54cb0f42fc7962bf7e069e17",
+    "first_chunk_inv_digest": "0x8608c0e518b85932e5935e7863ae9672bfc1a440e4b74d5617d98b3208a47c04",
+    "inv_digest": "0xe3eaf34a1e4624a2b012dd2980aa8ed29e2979e9f93e3cbf02666ed3ed5aa5a2",
+    "miller_digest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+    "miller_relation_root": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
+    "relation_root": "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8",
+    "residue_segments": 5,
+    "w0_digest": "0xf6a4c21838db987a8081b9ff63c28461c2949c670d57b4b38ad73cae8b045b64",
+    "w1_digest": "0x5dd75c84f1c53c511ff2bdcb1e1e304d2373a0a7505566e99d1c943dc89a997a"
+  },
   "lineCacheRelation": {
     "add_fq2_per_step": 2,
     "add_line_commitment": "0xa06c68cea868049c9559bdaedc1b40a090f6161c1a47190b024aa199d6b6d71d",
@@ -51,11 +64,11 @@
     "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
   ],
   "timings": {
-    "final_exponentiation_ms": 18,
+    "final_exponentiation_ms": 19,
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 176,
-    "miller_trace_generation_ms": 211,
+    "line_cache_generation_ms": 172,
+    "miller_trace_generation_ms": 212,
     "proof_input_generation_ms": 0,
-    "total_generation_ms": 407
+    "total_generation_ms": 405
   }
 }

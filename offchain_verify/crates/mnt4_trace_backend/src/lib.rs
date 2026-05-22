@@ -93,6 +93,21 @@ pub struct MillerRelation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FinalExponentiationRelation {
+    pub relation_root: String,
+    pub miller_relation_root: String,
+    pub miller_digest: String,
+    pub inv_digest: String,
+    pub first_chunk_digest: String,
+    pub first_chunk_inv_digest: String,
+    pub w1_digest: String,
+    pub w0_digest: String,
+    pub final_digest: String,
+    pub residue_segments: u32,
+    pub direct_chain_reference_steps: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeChunks {
     pub inv_out0: String,
     pub first_chunk_out0: String,
@@ -132,6 +147,7 @@ pub struct PairingArtifact {
     pub line_commitments: LineCommitments,
     pub line_cache_relation: LineCacheRelation,
     pub miller_relation: MillerRelation,
+    pub final_exponentiation_relation: FinalExponentiationRelation,
     pub pairing_digest: String,
     pub miller_digest: String,
     pub singles_digest: String,
@@ -279,6 +295,11 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         &pair_miller_digests,
         pairs,
     )?;
+    let final_exponentiation_relation = build_final_exponentiation_relation(
+        &miller_relation,
+        &miller_digest,
+        &fe_chunks,
+    )?;
     let context = parse_bytes32(&request.context)?;
     let transition_root = keccak(&abi_encode_words(&[
         hex_to_word(&miller_digest)?,
@@ -322,6 +343,7 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         line_commitments,
         line_cache_relation,
         miller_relation,
+        final_exponentiation_relation,
         pairing_digest,
         miller_digest,
         singles_digest,
@@ -530,6 +552,71 @@ fn miller_relation_root(
     Ok(keccak(&abi_encode_words(&words)))
 }
 
+
+pub fn validate_final_exponentiation_relation(
+    request: &TraceRequest,
+    relation: &FinalExponentiationRelation,
+) -> Result<(), String> {
+    let expected = build_artifact(request)?.final_exponentiation_relation;
+    compare_line_cache_field("relation_root", &relation.relation_root, &expected.relation_root)?;
+    compare_line_cache_field("miller_relation_root", &relation.miller_relation_root, &expected.miller_relation_root)?;
+    compare_line_cache_field("miller_digest", &relation.miller_digest, &expected.miller_digest)?;
+    compare_line_cache_field("inv_digest", &relation.inv_digest, &expected.inv_digest)?;
+    compare_line_cache_field("first_chunk_digest", &relation.first_chunk_digest, &expected.first_chunk_digest)?;
+    compare_line_cache_field("first_chunk_inv_digest", &relation.first_chunk_inv_digest, &expected.first_chunk_inv_digest)?;
+    compare_line_cache_field("w1_digest", &relation.w1_digest, &expected.w1_digest)?;
+    compare_line_cache_field("w0_digest", &relation.w0_digest, &expected.w0_digest)?;
+    compare_line_cache_field("final_digest", &relation.final_digest, &expected.final_digest)?;
+    if relation.residue_segments != expected.residue_segments {
+        return Err(format!("residue_segments mismatch: got {}, expected {}", relation.residue_segments, expected.residue_segments));
+    }
+    if relation.direct_chain_reference_steps != expected.direct_chain_reference_steps {
+        return Err(format!("direct_chain_reference_steps mismatch: got {}, expected {}", relation.direct_chain_reference_steps, expected.direct_chain_reference_steps));
+    }
+    Ok(())
+}
+
+fn build_final_exponentiation_relation(
+    miller_relation: &MillerRelation,
+    miller_digest: &str,
+    fe_chunks: &FeChunks,
+) -> Result<FinalExponentiationRelation, String> {
+    let relation_root = final_exponentiation_relation_root(miller_relation, miller_digest, fe_chunks)?;
+    Ok(FinalExponentiationRelation {
+        relation_root: hex32(&relation_root),
+        miller_relation_root: miller_relation.relation_root.clone(),
+        miller_digest: miller_digest.to_string(),
+        inv_digest: fe_chunks.inv_digest.clone(),
+        first_chunk_digest: fe_chunks.first_chunk_digest.clone(),
+        first_chunk_inv_digest: fe_chunks.first_chunk_inv_digest.clone(),
+        w1_digest: fe_chunks.w1_digest.clone(),
+        w0_digest: fe_chunks.w0_digest.clone(),
+        final_digest: fe_chunks.final_digest.clone(),
+        residue_segments: FINAL_EXP_SEGMENTS,
+        direct_chain_reference_steps: 753,
+    })
+}
+
+fn final_exponentiation_relation_root(
+    miller_relation: &MillerRelation,
+    miller_digest: &str,
+    fe_chunks: &FeChunks,
+) -> Result<[u8; 32], String> {
+    Ok(keccak(&abi_encode_words(&[
+        keccak(b"MNT4_FINAL_EXP_RESIDUE_RELATION_V1"),
+        parse_word(&miller_relation.relation_root)?,
+        parse_word(miller_digest)?,
+        parse_word(&fe_chunks.inv_digest)?,
+        parse_word(&fe_chunks.first_chunk_digest)?,
+        parse_word(&fe_chunks.first_chunk_inv_digest)?,
+        parse_word(&fe_chunks.w1_digest)?,
+        parse_word(&fe_chunks.w0_digest)?,
+        parse_word(&fe_chunks.final_digest)?,
+        uint64_word(FINAL_EXP_SEGMENTS as u64),
+        uint64_word(753),
+    ])))
+}
+
 pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(), String> {
     fs::create_dir_all(out_dir).map_err(|e| e.to_string())?;
     write_json(out_dir.join("trace.json"), artifact)?;
@@ -543,6 +630,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "lineCommitments": artifact.line_commitments,
             "lineCacheRelation": artifact.line_cache_relation,
             "millerRelation": artifact.miller_relation,
+            "finalExponentiationRelation": artifact.final_exponentiation_relation,
             "timings": artifact.timings,
         }),
     )?;
@@ -561,6 +649,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "coeffCommitment": artifact.line_commitments.coeff_commitment,
             "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
             "millerRelationRoot": artifact.miller_relation.relation_root,
+            "finalExponentiationRelationRoot": artifact.final_exponentiation_relation.relation_root,
             "pairingDigest": artifact.pairing_digest,
             "millerDigest": artifact.miller_digest,
             "singlesDigest": artifact.singles_digest,
@@ -585,6 +674,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "coeffCommitment": artifact.line_commitments.coeff_commitment,
                 "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
                 "millerRelationRoot": artifact.miller_relation.relation_root,
+                "finalExponentiationRelationRoot": artifact.final_exponentiation_relation.relation_root,
                 "qHash": artifact.q_hash,
                 "pointsHash": artifact.points_hash,
             },
@@ -595,6 +685,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "lineCommitments": artifact.line_commitments,
                 "lineCacheRelation": artifact.line_cache_relation,
                 "millerRelation": artifact.miller_relation,
+                "finalExponentiationRelation": artifact.final_exponentiation_relation,
                 "feChunks": artifact.fe_chunks,
                 "timings": artifact.timings,
             },

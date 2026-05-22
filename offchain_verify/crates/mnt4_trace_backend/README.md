@@ -62,3 +62,15 @@ The backend now emits `MillerRelation` in addition to `LineCacheRelation`. The r
 - loop shape: number of Miller doubling rounds and addition steps.
 
 The helper `validate_miller_relation(request, relation)` is an off-chain/reference validator: it rebuilds the artifact from the same request and rejects tampering. It is intentionally not an on-chain recomputation path.
+
+## Stage 5: final exponentiation residue relation artifact
+
+The backend now emits `FinalExponentiationRelation`. It binds the Miller relation root, Miller digest, final exponentiation chunk digests and final pairing digest:
+
+```text
+MillerRelationRoot -> MillerDigest -> FE chunks -> FinalDigest
+```
+
+The relation records both the residue-check shape used by the project and the direct-chain reference length. This distinction is important for the dissertation: the target architecture should verify a compact FE relation rather than reproduce the full final exponentiation chain inside a non-native BN254 circuit.
+
+The helper `validate_final_exponentiation_relation(request, relation)` is an off-chain/reference validator and rejects tampering of FE chunks such as the `w0` digest or the final digest.

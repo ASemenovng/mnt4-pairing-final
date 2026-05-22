@@ -219,3 +219,64 @@ fn miller_relation_rejects_tampered_line_cache_root() {
     let err = mnt4_trace_backend::validate_miller_relation(&request, &relation).unwrap_err();
     assert!(err.contains("line_cache_relation_root"));
 }
+
+#[test]
+fn final_exponentiation_residue_relation_binds_miller_and_final_digest() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 3,
+        nonce: 31,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let relation = artifact.final_exponentiation_relation.clone();
+    assert_eq!(relation.miller_relation_root, artifact.miller_relation.relation_root);
+    assert_eq!(relation.miller_digest, artifact.miller_digest);
+    assert_eq!(relation.final_digest, artifact.pairing_digest);
+    assert_eq!(relation.inv_digest, artifact.fe_chunks.inv_digest);
+    assert_eq!(relation.w0_digest, artifact.fe_chunks.w0_digest);
+    assert_eq!(relation.residue_segments, artifact.final_exp_segments);
+    mnt4_trace_backend::validate_final_exponentiation_relation(&request, &relation).unwrap();
+}
+
+#[test]
+fn final_exponentiation_residue_relation_rejects_tampered_w0_digest() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 3,
+        nonce: 32,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let mut relation = artifact.final_exponentiation_relation.clone();
+    relation.w0_digest = "0x0000000000000000000000000000000000000000000000000000000000000004".to_string();
+    let err = mnt4_trace_backend::validate_final_exponentiation_relation(&request, &relation).unwrap_err();
+    assert!(err.contains("w0_digest"));
+}
+
+#[test]
+fn final_exponentiation_residue_relation_rejects_tampered_final_digest() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 3,
+        nonce: 33,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let mut relation = artifact.final_exponentiation_relation.clone();
+    relation.final_digest = "0x0000000000000000000000000000000000000000000000000000000000000005".to_string();
+    let err = mnt4_trace_backend::validate_final_exponentiation_relation(&request, &relation).unwrap_err();
+    assert!(err.contains("final_digest"));
+}

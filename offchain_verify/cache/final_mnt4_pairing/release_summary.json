@@ -1,20 +1,20 @@
 {
   "rust_backend": {
-    "command_ms": 811,
+    "command_ms": 810,
     "reported_timings": {
-      "final_exponentiation_ms": 18,
+      "final_exponentiation_ms": 19,
       "input_normalization_ms": 0,
-      "line_cache_generation_ms": 176,
-      "miller_trace_generation_ms": 211,
+      "line_cache_generation_ms": 172,
+      "miller_trace_generation_ms": 212,
       "proof_input_generation_ms": 0,
-      "total_generation_ms": 407
+      "total_generation_ms": 405
     },
     "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
     "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
     "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47"
   },
   "proof": {
-    "generation_command_ms": 354,
+    "generation_command_ms": 468,
     "proof_bytes": 256,
     "public_inputs": 19,
     "claimedPairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
@@ -30,7 +30,7 @@
     "labels": 1567
   },
   "mnt_cycle_constraints": {
-    "report_generation_ms": 293,
+    "report_generation_ms": 452,
     "native_prepared_residue_constraints": 24178,
     "native_direct_fe_reference_constraints": 30845,
     "bn254_emulated_pairing_reference_constraints": 1393318,
@@ -54,6 +54,10 @@
     "testVerifySinglePairingAcceptsBoundStatement": 22003,
     "testVerifySinglePairingRejectsBadLineCommitment": 13454,
     "testVerifySinglePairingRejectsTamperedResult": 27164,
+    "testFinalFolderFpArithmeticMatchesArkworks": 2913414,
+    "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
+    "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
+    "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
     "testFinalMainContractRejectsTamperedFinalExponentiationCommitment": 25164,
     "testFinalMainContractRejectsTamperedLineCommitment": 24329,
     "testFinalMainContractRejectsTamperedMillerTraceCommitment": 25150,
@@ -61,11 +65,7 @@
     "testFinalMainContractRejectsTamperedQ": 26005,
     "testFinalMainContractRejectsTamperedResultDigest": 24055,
     "testFinalMainContractVerifiesRealProofEnvelope": 343435,
-    "testFinalFolderFpArithmeticMatchesArkworks": 2913414,
-    "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
-    "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
-    "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
-    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1987514,
+    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1994976,
     "testFuzzWrapperMatchesRawPrecompileBoolean_median": 2009879
   },
   "artifacts": {

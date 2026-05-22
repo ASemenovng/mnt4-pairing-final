@@ -83,3 +83,14 @@ fn miller_relation_breakdown_supports_single_and_multi_shared_accumulator() {
     );
     assert_eq!(multi4.total_constraints, 13_532);
 }
+
+#[test]
+fn final_exponentiation_residue_breakdown_compares_against_direct_chain() {
+    let model = RelationCostModel::default();
+    let breakdown = mnt_cycle_constraints::final_exponentiation_residue_breakdown(model, 5, 753);
+    assert_eq!(breakdown.residue_segments, 5);
+    assert_eq!(breakdown.residue_constraints, 110);
+    assert_eq!(breakdown.direct_chain_steps, 753);
+    assert_eq!(breakdown.direct_chain_constraints, 6_777);
+    assert!(breakdown.residue_constraints < breakdown.direct_chain_constraints);
+}
