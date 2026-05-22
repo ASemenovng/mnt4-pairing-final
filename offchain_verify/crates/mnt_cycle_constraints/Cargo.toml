@@ -12,3 +12,8 @@ path = "src/lib.rs"
 [[bin]]
 name = "mnt-cycle-constraints-report"
 path = "src/main.rs"
+
+[dependencies]
+ark-ff = "0.4"
+ark-mnt4-753 = "0.4"
+ark-relations = "0.4"

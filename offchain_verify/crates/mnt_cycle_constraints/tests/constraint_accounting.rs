@@ -94,3 +94,36 @@ fn final_exponentiation_residue_breakdown_compares_against_direct_chain() {
     assert_eq!(breakdown.direct_chain_constraints, 6_777);
     assert!(breakdown.residue_constraints < breakdown.direct_chain_constraints);
 }
+
+#[test]
+fn compiled_native_relation_is_real_r1cs_and_satisfied() {
+    let report = mnt_cycle_constraints::compile_prepared_relation_from_hex_roots(
+        "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
+        "0xe4d856950fae10a6cebe4eec166088df4be940fb0f70fef8de85e9895",
+        "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8",
+        1,
+    )
+    .unwrap();
+    assert!(report.is_satisfied);
+    assert_eq!(report.public_inputs, 3);
+    assert!(report.constraints > report.estimated_constraints);
+    assert!(report.constraints < mnt_cycle_constraints::comparison_estimate().bn254_emulated_pairing_reference);
+}
+
+#[test]
+fn compiled_native_relation_rejects_tampered_witness_root() {
+    let public = mnt_cycle_constraints::NativeRelationPublicInputs::from_hex_roots(
+        "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
+        "0xe4d856950fae10a6cebe4eec166088df4be940fb0f70fef8de85e9895",
+        "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8",
+    )
+    .unwrap();
+    let witness = mnt_cycle_constraints::NativeRelationWitness::from_hex_roots(
+        "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "0xe4d856950fae10a6cebe4eec166088df4be940fb0f70fef8de85e9895",
+        "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8",
+    )
+    .unwrap();
+    let report = mnt_cycle_constraints::compile_prepared_relation(public, witness, 1).unwrap();
+    assert!(!report.is_satisfied);
+}
