@@ -66,9 +66,9 @@
   "timings": {
     "final_exponentiation_ms": 19,
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 172,
-    "miller_trace_generation_ms": 212,
+    "line_cache_generation_ms": 195,
+    "miller_trace_generation_ms": 215,
     "proof_input_generation_ms": 0,
-    "total_generation_ms": 405
+    "total_generation_ms": 430
   }
 }

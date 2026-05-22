@@ -22,10 +22,10 @@
   "timings": {
     "final_exponentiation_ms": 19,
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 172,
-    "miller_trace_generation_ms": 212,
+    "line_cache_generation_ms": 195,
+    "miller_trace_generation_ms": 215,
     "proof_input_generation_ms": 0,
-    "total_generation_ms": 405
+    "total_generation_ms": 430
   },
   "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47",
   "transitionRoot": "0xeeb82b8a18a570bfe0e127698860ce15b788161204f7d9b75e047b59693459ac",

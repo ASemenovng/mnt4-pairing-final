@@ -1,20 +1,48 @@
 {
+  "pipeline": {
+    "offchain_source": "rust_arkworks_mnt4_backend",
+    "relation_evidence": "mnt_cycle_native_line_miller_fe_residue_artifacts",
+    "evm_verifier_layer": "compact_bn254_verifier_envelope",
+    "future_folding_layer": "mnt4_mnt6_native_relation_layer",
+    "solidity_entrypoint": "src/final_mnt4_pairing/MNT4PairingFinal.sol"
+  },
+  "relation_roots": {
+    "lineCacheRelationRoot": "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
+    "millerRelationRoot": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
+    "finalExponentiationRelationRoot": "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8"
+  },
+  "comparison_table": {
+    "old_full_onchain_reference_gas": 259719954,
+    "new_final_verifier_gas": 343435,
+    "backend_only_checker_gas": 325283,
+    "rust_backend_reported_total_ms": 430,
+    "proof_generation_ms": 518,
+    "bn254_envelope_constraints": 1538,
+    "mnt_native_relation_constraints": 24178,
+    "miller_single_constraints": 4514,
+    "miller_multi2_constraints": 7520,
+    "miller_multi4_constraints": 13532,
+    "line_cache_relation_constraints": 19554,
+    "fe_residue_constraints": 110,
+    "bn254_emulated_pairing_reference_constraints": 1393318,
+    "sonobe_decider_reference_constraints": 9000000
+  },
   "rust_backend": {
-    "command_ms": 810,
+    "command_ms": 1016,
     "reported_timings": {
       "final_exponentiation_ms": 19,
       "input_normalization_ms": 0,
-      "line_cache_generation_ms": 172,
-      "miller_trace_generation_ms": 212,
+      "line_cache_generation_ms": 195,
+      "miller_trace_generation_ms": 215,
       "proof_input_generation_ms": 0,
-      "total_generation_ms": 405
+      "total_generation_ms": 430
     },
     "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
     "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
     "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47"
   },
   "proof": {
-    "generation_command_ms": 468,
+    "generation_command_ms": 518,
     "proof_bytes": 256,
     "public_inputs": 19,
     "claimedPairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
@@ -30,7 +58,7 @@
     "labels": 1567
   },
   "mnt_cycle_constraints": {
-    "report_generation_ms": 452,
+    "report_generation_ms": 432,
     "native_prepared_residue_constraints": 24178,
     "native_direct_fe_reference_constraints": 30845,
     "bn254_emulated_pairing_reference_constraints": 1393318,
@@ -54,10 +82,6 @@
     "testVerifySinglePairingAcceptsBoundStatement": 22003,
     "testVerifySinglePairingRejectsBadLineCommitment": 13454,
     "testVerifySinglePairingRejectsTamperedResult": 27164,
-    "testFinalFolderFpArithmeticMatchesArkworks": 2913414,
-    "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
-    "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
-    "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
     "testFinalMainContractRejectsTamperedFinalExponentiationCommitment": 25164,
     "testFinalMainContractRejectsTamperedLineCommitment": 24329,
     "testFinalMainContractRejectsTamperedMillerTraceCommitment": 25150,
@@ -65,7 +89,11 @@
     "testFinalMainContractRejectsTamperedQ": 26005,
     "testFinalMainContractRejectsTamperedResultDigest": 24055,
     "testFinalMainContractVerifiesRealProofEnvelope": 343435,
-    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1994976,
+    "testFinalFolderFpArithmeticMatchesArkworks": 2913414,
+    "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
+    "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
+    "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
+    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 2002436,
     "testFuzzWrapperMatchesRawPrecompileBoolean_median": 2009879
   },
   "artifacts": {

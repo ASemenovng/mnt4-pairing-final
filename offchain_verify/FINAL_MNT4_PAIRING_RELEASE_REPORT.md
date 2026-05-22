@@ -6,6 +6,33 @@
 
 Финальный путь содержит один публичный deployable-entrypoint `MNT4PairingFinal`, арифметические/reference-контракты и нейтральный proof-checker adapter. В этом контуре намеренно отсутствуют ownership, replay-state, expiry-policy, consume-режим, изменяемые registry и diagnostic on-chain recomputation.
 
+## Итоговая сравнительная таблица
+
+| Слой / измерение | Метрика | Значение |
+|---|---|---:|
+| Full on-chain baseline | Reference MNT4 pairing digest gas | 259719954 |
+| New on-chain verifier | Final verifier gas | 343435 |
+| New on-chain verifier | Backend-only checker gas | 325283 |
+| Rust backend | Total reported generation, ms | 430 |
+| Proof generation | Command wall time, ms | 518 |
+| BN254 verifier-envelope | Constraints | 1538 |
+| MNT-native relation evidence | Total prepared/residue constraints | 24178 |
+| MNT-native relation evidence | Miller single constraints | 4514 |
+| MNT-native relation evidence | Miller multi n=2 constraints | 7520 |
+| MNT-native relation evidence | Miller multi n=4 constraints | 13532 |
+| MNT-native relation evidence | Line-cache constraints | 19554 |
+| MNT-native relation evidence | FE residue constraints | 110 |
+| External comparison anchor | BN254 emulated pairing constraints | 1393318 |
+| External comparison anchor | Sonobe-like decider constraints | 9000000 |
+
+## Relation roots из Rust artifacts
+
+| Relation root | Значение |
+|---|---|
+| lineCacheRelationRoot | `0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99` |
+| millerRelationRoot | `0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895` |
+| finalExponentiationRelationRoot | `0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8` |
+
 ## Основные on-chain метрики
 
 | Измерение | Gas |
@@ -44,12 +71,12 @@
 
 | Этап | Время, ms |
 |---|---:|
-| Генерация line cache | 172 |
-| Генерация Miller trace | 212 |
+| Генерация line cache | 195 |
+| Генерация Miller trace | 215 |
 | Final exponentiation | 19 |
 | Генерация proof input | 0 |
-| Total reported generation | 405 |
-| Wall time Rust-команды | 810 |
+| Total reported generation | 430 |
+| Wall time Rust-команды | 1016 |
 
 ## Проверки корректности
 

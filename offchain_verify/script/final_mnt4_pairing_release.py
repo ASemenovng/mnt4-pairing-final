@@ -130,6 +130,7 @@ def main() -> int:
         "--out-dir", str(RUST_OUT),
     ], timeout=120)
     rust_public = json.loads((RUST_OUT / "public_inputs.json").read_text())
+    rust_proof_input = json.loads((RUST_OUT / "proof_input.json").read_text())
 
     proof_json, proof_generation_ms = regenerate_final_proof(RUST_OUT / "proof_input.json")
 
@@ -145,7 +146,39 @@ def main() -> int:
     gas_stdout, gas_ms = run(["forge", "test", "--offline", "--match-path", "test/final_mnt4_pairing/*", "--gas-report"], timeout=240)
     (CACHE / "forge_final_gas_report.log").write_text(gas_stdout)
 
+    gas = parse_test_gas(gas_stdout)
+    relation_roots = {
+        "lineCacheRelationRoot": rust_proof_input["public"].get("lineCacheRelationRoot"),
+        "millerRelationRoot": rust_proof_input["public"].get("millerRelationRoot"),
+        "finalExponentiationRelationRoot": rust_proof_input["public"].get("finalExponentiationRelationRoot"),
+    }
+    comparison_table = {
+        "old_full_onchain_reference_gas": gas.get("testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet"),
+        "new_final_verifier_gas": gas.get("testFinalMainContractVerifiesRealProofEnvelope"),
+        "backend_only_checker_gas": gas.get("testRealProofFixtureVerifiesThroughNeutralChecker"),
+        "rust_backend_reported_total_ms": rust_public.get("timings", {}).get("total_generation_ms"),
+        "proof_generation_ms": proof_generation_ms,
+        "bn254_envelope_constraints": constraints.get("constraints"),
+        "mnt_native_relation_constraints": mnt_cycle_constraints.get("native_prepared_residue_constraints"),
+        "miller_single_constraints": mnt_cycle_constraints.get("miller_single_constraints"),
+        "miller_multi2_constraints": mnt_cycle_constraints.get("miller_multi2_constraints"),
+        "miller_multi4_constraints": mnt_cycle_constraints.get("miller_multi4_constraints"),
+        "line_cache_relation_constraints": mnt_cycle_constraints.get("line_cache_relation_constraints"),
+        "fe_residue_constraints": mnt_cycle_constraints.get("final_exponentiation_residue_constraints"),
+        "bn254_emulated_pairing_reference_constraints": mnt_cycle_constraints.get("bn254_emulated_pairing_reference_constraints"),
+        "sonobe_decider_reference_constraints": mnt_cycle_constraints.get("sonobe_decider_reference_constraints"),
+    }
+
     summary = {
+        "pipeline": {
+            "offchain_source": "rust_arkworks_mnt4_backend",
+            "relation_evidence": "mnt_cycle_native_line_miller_fe_residue_artifacts",
+            "evm_verifier_layer": "compact_bn254_verifier_envelope",
+            "future_folding_layer": "mnt4_mnt6_native_relation_layer",
+            "solidity_entrypoint": "src/final_mnt4_pairing/MNT4PairingFinal.sol",
+        },
+        "relation_roots": relation_roots,
+        "comparison_table": comparison_table,
         "rust_backend": {
             "command_ms": rust_total_ms,
             "reported_timings": rust_public.get("timings", {}),
@@ -167,7 +200,7 @@ def main() -> int:
             "report_generation_ms": mnt_cycle_report_ms,
             **mnt_cycle_constraints,
         },
-        "gas": parse_test_gas(gas_stdout),
+        "gas": gas,
         "artifacts": {
             "rust_output_dir": str(RUST_OUT.relative_to(ROOT)),
             "proof_fixture": "cache/final_mnt4_pairing/final_single_real_proof.json",
@@ -178,6 +211,8 @@ def main() -> int:
 
     gas = summary["gas"]
     timings = summary["rust_backend"]["reported_timings"]
+    table = summary["comparison_table"]
+    roots = summary["relation_roots"]
     REPORT_MD.write_text(f"""# Финальный отчет по реализации MNT4 pairing verifier
 
 Документ формируется командой `script/final_mnt4_pairing_release.py` для итоговой реализации, вынесенной в `src/final_mnt4_pairing`.
@@ -185,6 +220,33 @@ def main() -> int:
 ## Область отчета
 
 Финальный путь содержит один публичный deployable-entrypoint `MNT4PairingFinal`, арифметические/reference-контракты и нейтральный proof-checker adapter. В этом контуре намеренно отсутствуют ownership, replay-state, expiry-policy, consume-режим, изменяемые registry и diagnostic on-chain recomputation.
+
+## Итоговая сравнительная таблица
+
+| Слой / измерение | Метрика | Значение |
+|---|---|---:|
+| Full on-chain baseline | Reference MNT4 pairing digest gas | {table.get('old_full_onchain_reference_gas', 'n/a')} |
+| New on-chain verifier | Final verifier gas | {table.get('new_final_verifier_gas', 'n/a')} |
+| New on-chain verifier | Backend-only checker gas | {table.get('backend_only_checker_gas', 'n/a')} |
+| Rust backend | Total reported generation, ms | {table.get('rust_backend_reported_total_ms', 'n/a')} |
+| Proof generation | Command wall time, ms | {table.get('proof_generation_ms', 'n/a')} |
+| BN254 verifier-envelope | Constraints | {table.get('bn254_envelope_constraints', 'n/a')} |
+| MNT-native relation evidence | Total prepared/residue constraints | {table.get('mnt_native_relation_constraints', 'n/a')} |
+| MNT-native relation evidence | Miller single constraints | {table.get('miller_single_constraints', 'n/a')} |
+| MNT-native relation evidence | Miller multi n=2 constraints | {table.get('miller_multi2_constraints', 'n/a')} |
+| MNT-native relation evidence | Miller multi n=4 constraints | {table.get('miller_multi4_constraints', 'n/a')} |
+| MNT-native relation evidence | Line-cache constraints | {table.get('line_cache_relation_constraints', 'n/a')} |
+| MNT-native relation evidence | FE residue constraints | {table.get('fe_residue_constraints', 'n/a')} |
+| External comparison anchor | BN254 emulated pairing constraints | {table.get('bn254_emulated_pairing_reference_constraints', 'n/a')} |
+| External comparison anchor | Sonobe-like decider constraints | {table.get('sonobe_decider_reference_constraints', 'n/a')} |
+
+## Relation roots из Rust artifacts
+
+| Relation root | Значение |
+|---|---|
+| lineCacheRelationRoot | `{roots.get('lineCacheRelationRoot')}` |
+| millerRelationRoot | `{roots.get('millerRelationRoot')}` |
+| finalExponentiationRelationRoot | `{roots.get('finalExponentiationRelationRoot')}` |
 
 ## Основные on-chain метрики
 
