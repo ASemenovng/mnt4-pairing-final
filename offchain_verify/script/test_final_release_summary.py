@@ -34,3 +34,21 @@ class FinalReleaseSummaryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class FinalReleaseCompiledNativeRelationTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.summary = json.loads(SUMMARY.read_text())
+
+    def test_compiled_native_relation_metrics_are_reported(self):
+        table = self.summary["comparison_table"]
+        self.assertGreater(table["compiled_mnt_native_relation_constraints"], table["mnt_native_relation_constraints"])
+        self.assertLess(table["compiled_mnt_native_relation_constraints"], table["bn254_emulated_pairing_reference_constraints"])
+        self.assertEqual(table["compiled_mnt_native_relation_public_inputs"], 3)
+        self.assertTrue(table["compiled_mnt_native_relation_satisfied"])
+
+    def test_rust_backend_exports_native_relation_summary(self):
+        native = self.summary["rust_backend"]["native_relation"]
+        self.assertEqual(native["kind"], "compiledMntNativeRelation")
+        self.assertTrue(native["is_satisfied"])
+        self.assertGreater(native["constraints"], native["estimated_constraints"])

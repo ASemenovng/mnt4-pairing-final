@@ -13,10 +13,13 @@
 | Full on-chain baseline | Reference MNT4 pairing digest gas | 259719954 |
 | New on-chain verifier | Final verifier gas | 343435 |
 | New on-chain verifier | Backend-only checker gas | 325283 |
-| Rust backend | Total reported generation, ms | 430 |
-| Proof generation | Command wall time, ms | 518 |
+| Rust backend | Total reported generation, ms | 835 |
+| Proof generation | Command wall time, ms | 482 |
 | BN254 verifier-envelope | Constraints | 1538 |
 | MNT-native relation evidence | Total prepared/residue constraints | 24178 |
+| Compiled MNT-native relation fragment | R1CS constraints | 24181 |
+| Compiled MNT-native relation fragment | Public inputs | 3 |
+| Compiled MNT-native relation fragment | Witness variables | 72537 |
 | MNT-native relation evidence | Miller single constraints | 4514 |
 | MNT-native relation evidence | Miller multi n=2 constraints | 7520 |
 | MNT-native relation evidence | Miller multi n=4 constraints | 13532 |
@@ -54,7 +57,7 @@
 
 Важно: эти circuit-метрики относятся к compact BN254 verifier-envelope, а не к полному доказательству MNT4-сопряжения. Для оценки будущего MNT-native/folding слоя используется отдельный отчет `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.
 
-## Метрики MNT-cycle native relation model
+## Метрики MNT-cycle native relation layer
 
 | Измерение | Constraints |
 |---|---:|
@@ -64,6 +67,9 @@
 | Line-cache relation | 19554 |
 | Final exponentiation residue relation | 110 |
 | MNT-native prepared/residue model total | 24178 |
+| Compiled R1CS fragment constraints | 24181 |
+| Compiled R1CS fragment public inputs | 3 |
+| Compiled R1CS fragment witness variables | 72537 |
 | BN254 emulated pairing reference | 1393318 |
 | Sonobe-like decider reference | 9000000 |
 
@@ -71,12 +77,12 @@
 
 | Этап | Время, ms |
 |---|---:|
-| Генерация line cache | 195 |
-| Генерация Miller trace | 215 |
+| Генерация line cache | 187 |
+| Генерация Miller trace | 217 |
 | Final exponentiation | 19 |
-| Генерация proof input | 0 |
-| Total reported generation | 430 |
-| Wall time Rust-команды | 1016 |
+| Генерация proof input | 411 |
+| Total reported generation | 835 |
+| Wall time Rust-команды | 1170 |
 
 ## Проверки корректности
 

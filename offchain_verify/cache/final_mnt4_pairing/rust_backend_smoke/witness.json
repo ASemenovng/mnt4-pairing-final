@@ -60,15 +60,33 @@
     "shared_accumulator": true,
     "singles_digest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
   },
+  "nativeRelation": {
+    "bn254_emulated_pairing_reference_constraints": 1393318,
+    "constraints": 24181,
+    "estimated_constraints": 24178,
+    "fe_residue_constraints": 110,
+    "final_exponentiation_relation_root": "0x1eb603478321298f4249195923b2c1034802ac1a48d3289f6dfbd074a77b87c8",
+    "is_satisfied": true,
+    "kind": "compiledMntNativeRelation",
+    "line_cache_constraints": 19554,
+    "line_cache_relation_root": "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
+    "miller_constraints": 4514,
+    "miller_relation_root": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
+    "pairs": 1,
+    "public_inputs": 3,
+    "root_binding_constraints": 3,
+    "sonobe_decider_reference_constraints": 9000000,
+    "witness_variables": 72537
+  },
   "pairMillerDigests": [
     "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
   ],
   "timings": {
     "final_exponentiation_ms": 19,
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 195,
-    "miller_trace_generation_ms": 215,
-    "proof_input_generation_ms": 0,
-    "total_generation_ms": 430
+    "line_cache_generation_ms": 187,
+    "miller_trace_generation_ms": 217,
+    "proof_input_generation_ms": 411,
+    "total_generation_ms": 835
   }
 }

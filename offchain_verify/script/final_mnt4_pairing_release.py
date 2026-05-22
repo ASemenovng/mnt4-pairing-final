@@ -80,6 +80,9 @@ def parse_mnt_cycle_report(text: str) -> dict[str, int]:
         "miller_multi4_constraints": r"Multi pair, n=4 \| \d+ \| \d+ \| (\d+) \|",
         "line_cache_relation_constraints": r"Line-cache relation \| (\d+) \|",
         "final_exponentiation_residue_constraints": r"Final exponentiation residue relation, .* \| (\d+) \|",
+        "compiled_mnt_native_relation_constraints": r"R1CS constraints \| (\d+) \|",
+        "compiled_mnt_native_relation_public_inputs": r"Public inputs \| (\d+) \|",
+        "compiled_mnt_native_relation_witness_variables": r"Witness variables \| (\d+) \|",
     }
     for key, pattern in patterns.items():
         m = re.search(pattern, text)
@@ -152,6 +155,7 @@ def main() -> int:
         "millerRelationRoot": rust_proof_input["public"].get("millerRelationRoot"),
         "finalExponentiationRelationRoot": rust_proof_input["public"].get("finalExponentiationRelationRoot"),
     }
+    native_relation = rust_public.get("nativeRelation", {})
     comparison_table = {
         "old_full_onchain_reference_gas": gas.get("testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet"),
         "new_final_verifier_gas": gas.get("testFinalMainContractVerifiesRealProofEnvelope"),
@@ -160,6 +164,10 @@ def main() -> int:
         "proof_generation_ms": proof_generation_ms,
         "bn254_envelope_constraints": constraints.get("constraints"),
         "mnt_native_relation_constraints": mnt_cycle_constraints.get("native_prepared_residue_constraints"),
+        "compiled_mnt_native_relation_constraints": native_relation.get("constraints") or mnt_cycle_constraints.get("compiled_mnt_native_relation_constraints"),
+        "compiled_mnt_native_relation_public_inputs": native_relation.get("public_inputs") or mnt_cycle_constraints.get("compiled_mnt_native_relation_public_inputs"),
+        "compiled_mnt_native_relation_witness_variables": native_relation.get("witness_variables") or mnt_cycle_constraints.get("compiled_mnt_native_relation_witness_variables"),
+        "compiled_mnt_native_relation_satisfied": native_relation.get("is_satisfied"),
         "miller_single_constraints": mnt_cycle_constraints.get("miller_single_constraints"),
         "miller_multi2_constraints": mnt_cycle_constraints.get("miller_multi2_constraints"),
         "miller_multi4_constraints": mnt_cycle_constraints.get("miller_multi4_constraints"),
@@ -185,6 +193,7 @@ def main() -> int:
             "pairingDigest": rust_public.get("pairingDigest"),
             "millerDigest": rust_public.get("millerDigest"),
             "traceRoot": rust_public.get("traceRoot"),
+            "native_relation": native_relation,
         },
         "proof": {
             "generation_command_ms": proof_generation_ms,
@@ -232,6 +241,9 @@ def main() -> int:
 | Proof generation | Command wall time, ms | {table.get('proof_generation_ms', 'n/a')} |
 | BN254 verifier-envelope | Constraints | {table.get('bn254_envelope_constraints', 'n/a')} |
 | MNT-native relation evidence | Total prepared/residue constraints | {table.get('mnt_native_relation_constraints', 'n/a')} |
+| Compiled MNT-native relation fragment | R1CS constraints | {table.get('compiled_mnt_native_relation_constraints', 'n/a')} |
+| Compiled MNT-native relation fragment | Public inputs | {table.get('compiled_mnt_native_relation_public_inputs', 'n/a')} |
+| Compiled MNT-native relation fragment | Witness variables | {table.get('compiled_mnt_native_relation_witness_variables', 'n/a')} |
 | MNT-native relation evidence | Miller single constraints | {table.get('miller_single_constraints', 'n/a')} |
 | MNT-native relation evidence | Miller multi n=2 constraints | {table.get('miller_multi2_constraints', 'n/a')} |
 | MNT-native relation evidence | Miller multi n=4 constraints | {table.get('miller_multi4_constraints', 'n/a')} |
@@ -269,7 +281,7 @@ def main() -> int:
 
 Важно: эти circuit-метрики относятся к compact BN254 verifier-envelope, а не к полному доказательству MNT4-сопряжения. Для оценки будущего MNT-native/folding слоя используется отдельный отчет `cache/mnt_cycle_constraints/MNT_CYCLE_CONSTRAINTS_REPORT.md`.
 
-## Метрики MNT-cycle native relation model
+## Метрики MNT-cycle native relation layer
 
 | Измерение | Constraints |
 |---|---:|
@@ -279,6 +291,9 @@ def main() -> int:
 | Line-cache relation | {summary['mnt_cycle_constraints'].get('line_cache_relation_constraints', 'n/a')} |
 | Final exponentiation residue relation | {summary['mnt_cycle_constraints'].get('final_exponentiation_residue_constraints', 'n/a')} |
 | MNT-native prepared/residue model total | {summary['mnt_cycle_constraints'].get('native_prepared_residue_constraints', 'n/a')} |
+| Compiled R1CS fragment constraints | {summary['comparison_table'].get('compiled_mnt_native_relation_constraints', 'n/a')} |
+| Compiled R1CS fragment public inputs | {summary['comparison_table'].get('compiled_mnt_native_relation_public_inputs', 'n/a')} |
+| Compiled R1CS fragment witness variables | {summary['comparison_table'].get('compiled_mnt_native_relation_witness_variables', 'n/a')} |
 | BN254 emulated pairing reference | {summary['mnt_cycle_constraints'].get('bn254_emulated_pairing_reference_constraints', 'n/a')} |
 | Sonobe-like decider reference | {summary['mnt_cycle_constraints'].get('sonobe_decider_reference_constraints', 'n/a')} |
 
