@@ -111,6 +111,34 @@ impl Default for RelationCostModel {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LineCacheRelationBreakdown {
+    pub double_steps: u64,
+    pub addition_steps: u64,
+    pub double_line_constraints: u64,
+    pub addition_line_constraints: u64,
+    pub commitment_binding_constraints: u64,
+    pub total_constraints: u64,
+}
+
+pub fn line_cache_relation_breakdown(
+    model: RelationCostModel,
+    double_steps: u64,
+    addition_steps: u64,
+) -> LineCacheRelationBreakdown {
+    let double_line_constraints = double_steps * model.line_cache_double_check;
+    let addition_line_constraints = addition_steps * model.line_cache_add_check;
+    let commitment_binding_constraints = 0;
+    LineCacheRelationBreakdown {
+        double_steps,
+        addition_steps,
+        double_line_constraints,
+        addition_line_constraints,
+        commitment_binding_constraints,
+        total_constraints: double_line_constraints + addition_line_constraints + commitment_binding_constraints,
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PairingRelationEstimate {
     pub miller_rounds: u64,
     pub addition_steps: u64,
@@ -133,8 +161,7 @@ pub fn estimate_pairing_relation(
     let miller_transition_constraints = miller_rounds
         * (model.tower.fq4_sqr + model.tower.fq4_sparse_line_mul)
         + addition_steps * model.tower.fq4_sparse_line_mul;
-    let line_cache_constraints = miller_rounds * model.line_cache_double_check
-        + addition_steps * model.line_cache_add_check;
+    let line_cache_constraints = line_cache_relation_breakdown(model, miller_rounds, addition_steps).total_constraints;
     let fe_residue_constraints = 5 * model.fe_residue_segment;
     // A conservative lower-complexity reference for a direct FE chain with 753 hard-part steps.
     // It is intentionally not used as the implementation target.
@@ -197,6 +224,14 @@ pub fn render_markdown_report() -> String {
     writeln!(out, "| Fq4 multiplication | {} |", tower.fq4_mul).unwrap();
     writeln!(out, "| Fq4 square | {} |", tower.fq4_sqr).unwrap();
     writeln!(out, "| Fq4 sparse line multiplication | {} |", tower.fq4_sparse_line_mul).unwrap();
+    let line_breakdown = line_cache_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS);
+    writeln!(out, "\n## Line-cache relation breakdown\n").unwrap();
+    writeln!(out, "| Component | Constraints |").unwrap();
+    writeln!(out, "|---|---:|").unwrap();
+    writeln!(out, "| Double-line consistency checks, {} steps | {} |", line_breakdown.double_steps, line_breakdown.double_line_constraints).unwrap();
+    writeln!(out, "| Addition-line consistency checks, {} steps | {} |", line_breakdown.addition_steps, line_breakdown.addition_line_constraints).unwrap();
+    writeln!(out, "| Commitment binding, public hash equality only | {} |", line_breakdown.commitment_binding_constraints).unwrap();
+    writeln!(out, "| Total line-cache relation | {} |", line_breakdown.total_constraints).unwrap();
     writeln!(out, "\n## Prepared pairing relation estimate\n").unwrap();
     writeln!(out, "| Component | Constraints |").unwrap();
     writeln!(out, "|---|---:|").unwrap();

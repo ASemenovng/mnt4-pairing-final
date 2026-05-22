@@ -37,3 +37,17 @@ fn native_relation_model_is_below_emulated_reference_anchors() {
     assert!(cmp.native_prepared_residue < cmp.bn254_emulated_pairing_reference);
     assert!(cmp.native_prepared_residue < cmp.sonobe_decider_reference);
 }
+
+#[test]
+fn line_cache_relation_breakdown_is_explicit() {
+    let breakdown = mnt_cycle_constraints::line_cache_relation_breakdown(
+        mnt_cycle_constraints::RelationCostModel::default(),
+        DEFAULT_MILLER_ROUNDS,
+        DEFAULT_ADDITION_STEPS,
+    );
+    assert_eq!(breakdown.double_line_constraints, 15_834);
+    assert_eq!(breakdown.addition_line_constraints, 3_720);
+    assert_eq!(breakdown.total_constraints, 19_554);
+    assert_eq!(breakdown.double_steps, 377);
+    assert_eq!(breakdown.addition_steps, 124);
+}

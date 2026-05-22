@@ -63,6 +63,22 @@ pub struct LineCommitments {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LineCacheRelation {
+    pub relation_root: String,
+    pub q_hash: Option<String>,
+    pub fixed_q_id: Option<String>,
+    pub coeff_commitment: String,
+    pub dbl_line_commitment: String,
+    pub add_line_commitment: String,
+    pub miller_rounds: u32,
+    pub addition_steps_with_neg: u32,
+    pub dbl_sparse_bytes: usize,
+    pub add_sparse_bytes: usize,
+    pub dbl_fq2_per_step: usize,
+    pub add_fq2_per_step: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeChunks {
     pub inv_out0: String,
     pub first_chunk_out0: String,
@@ -100,6 +116,7 @@ pub struct PairingArtifact {
     pub q_hash: Option<String>,
     pub points_hash: String,
     pub line_commitments: LineCommitments,
+    pub line_cache_relation: LineCacheRelation,
     pub pairing_digest: String,
     pub miller_digest: String,
     pub singles_digest: String,
@@ -194,13 +211,18 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
             .concat(),
         )),
     };
-    let line_cache_generation_ms = elapsed_ms(line_started);
-
     let q_hash = if request.mode == BackendMode::ParametricQ {
         Some(hex32(&hash_parametric_q(&q)))
     } else {
         None
     };
+    let line_cache_relation = build_line_cache_relation(
+        request,
+        q_hash.clone(),
+        &line_commitments,
+        &line_material,
+    )?;
+    let line_cache_generation_ms = elapsed_ms(line_started);
     let points_hash = hex32(&hash_points(&points));
 
     let miller_started = Instant::now();
@@ -275,6 +297,7 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         q_hash,
         points_hash,
         line_commitments,
+        line_cache_relation,
         pairing_digest,
         miller_digest,
         singles_digest,
@@ -298,6 +321,104 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
     })
 }
 
+
+pub fn validate_line_cache_relation(
+    request: &TraceRequest,
+    relation: &LineCacheRelation,
+) -> Result<(), String> {
+    let expected = build_artifact(request)?.line_cache_relation;
+    compare_line_cache_field("relation_root", &relation.relation_root, &expected.relation_root)?;
+    if relation.q_hash != expected.q_hash {
+        return Err(format!(
+            "q_hash mismatch: got {:?}, expected {:?}",
+            relation.q_hash, expected.q_hash
+        ));
+    }
+    if relation.fixed_q_id != expected.fixed_q_id {
+        return Err(format!(
+            "fixed_q_id mismatch: got {:?}, expected {:?}",
+            relation.fixed_q_id, expected.fixed_q_id
+        ));
+    }
+    compare_line_cache_field("coeff_commitment", &relation.coeff_commitment, &expected.coeff_commitment)?;
+    compare_line_cache_field("dbl_line_commitment", &relation.dbl_line_commitment, &expected.dbl_line_commitment)?;
+    compare_line_cache_field("add_line_commitment", &relation.add_line_commitment, &expected.add_line_commitment)?;
+    if relation.miller_rounds != expected.miller_rounds {
+        return Err(format!("miller_rounds mismatch: got {}, expected {}", relation.miller_rounds, expected.miller_rounds));
+    }
+    if relation.addition_steps_with_neg != expected.addition_steps_with_neg {
+        return Err(format!("addition_steps_with_neg mismatch: got {}, expected {}", relation.addition_steps_with_neg, expected.addition_steps_with_neg));
+    }
+    if relation.dbl_sparse_bytes != expected.dbl_sparse_bytes {
+        return Err(format!("dbl_sparse_bytes mismatch: got {}, expected {}", relation.dbl_sparse_bytes, expected.dbl_sparse_bytes));
+    }
+    if relation.add_sparse_bytes != expected.add_sparse_bytes {
+        return Err(format!("add_sparse_bytes mismatch: got {}, expected {}", relation.add_sparse_bytes, expected.add_sparse_bytes));
+    }
+    Ok(())
+}
+
+fn compare_line_cache_field(name: &str, got: &str, expected: &str) -> Result<(), String> {
+    if got == expected {
+        Ok(())
+    } else {
+        Err(format!("{name} mismatch: got {got}, expected {expected}"))
+    }
+}
+
+fn build_line_cache_relation(
+    request: &TraceRequest,
+    q_hash: Option<String>,
+    commitments: &LineCommitments,
+    material: &SparseLineMaterial,
+) -> Result<LineCacheRelation, String> {
+    let relation_root = line_cache_relation_root(request, q_hash.as_deref(), commitments, material)?;
+    Ok(LineCacheRelation {
+        relation_root: hex32(&relation_root),
+        q_hash,
+        fixed_q_id: request.fixed_q_id.clone(),
+        coeff_commitment: commitments.coeff_commitment.clone(),
+        dbl_line_commitment: commitments.dbl_line_commitment.clone(),
+        add_line_commitment: commitments.add_line_commitment.clone(),
+        miller_rounds: material.miller_rounds,
+        addition_steps_with_neg: material.addition_steps_with_neg,
+        dbl_sparse_bytes: material.dbl_blob.len(),
+        add_sparse_bytes: material.add_blob.len(),
+        dbl_fq2_per_step: DBL_SPARSE_FQ2_PER_STEP,
+        add_fq2_per_step: ADD_SPARSE_FQ2_PER_STEP,
+    })
+}
+
+fn line_cache_relation_root(
+    request: &TraceRequest,
+    q_hash: Option<&str>,
+    commitments: &LineCommitments,
+    material: &SparseLineMaterial,
+) -> Result<[u8; 32], String> {
+    let mut words = Vec::new();
+    words.push(keccak(b"MNT4_LINE_CACHE_RELATION_V1"));
+    words.push(match q_hash {
+        Some(v) => parse_word(v)?,
+        None => keccak(b"MNT4_FIXED_Q_IMPLICIT_GENERATOR"),
+    });
+    words.push(parse_word(&commitments.coeff_commitment)?);
+    words.push(parse_word(&commitments.dbl_line_commitment)?);
+    words.push(parse_word(&commitments.add_line_commitment)?);
+    words.push(uint64_word(material.miller_rounds as u64));
+    words.push(uint64_word(material.addition_steps_with_neg as u64));
+    words.push(uint64_word(material.dbl_blob.len() as u64));
+    words.push(uint64_word(material.add_blob.len() as u64));
+    words.push(uint64_word(DBL_SPARSE_FQ2_PER_STEP as u64));
+    words.push(uint64_word(ADD_SPARSE_FQ2_PER_STEP as u64));
+    let fixed_q_hash = request
+        .fixed_q_id
+        .as_ref()
+        .map(|s| keccak(s.as_bytes()))
+        .unwrap_or_else(|| keccak(b"MNT4_NO_FIXED_Q_ID"));
+    words.push(fixed_q_hash);
+    Ok(keccak(&abi_encode_words(&words)))
+}
+
 pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(), String> {
     fs::create_dir_all(out_dir).map_err(|e| e.to_string())?;
     write_json(out_dir.join("trace.json"), artifact)?;
@@ -309,6 +430,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "pairMillerDigests": artifact.pair_miller_digests,
             "feChunks": artifact.fe_chunks,
             "lineCommitments": artifact.line_commitments,
+            "lineCacheRelation": artifact.line_cache_relation,
             "timings": artifact.timings,
         }),
     )?;
@@ -325,6 +447,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "qHash": artifact.q_hash,
             "pointsHash": artifact.points_hash,
             "coeffCommitment": artifact.line_commitments.coeff_commitment,
+            "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
             "pairingDigest": artifact.pairing_digest,
             "millerDigest": artifact.miller_digest,
             "singlesDigest": artifact.singles_digest,
@@ -347,6 +470,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "singlesDigest": artifact.singles_digest,
                 "pairMillerDigests": artifact.pair_miller_digests,
                 "coeffCommitment": artifact.line_commitments.coeff_commitment,
+                "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
                 "qHash": artifact.q_hash,
                 "pointsHash": artifact.points_hash,
             },
@@ -355,6 +479,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "millerOut11": artifact.miller_out11,
                 "pairMillerDigests": artifact.pair_miller_digests,
                 "lineCommitments": artifact.line_commitments,
+                "lineCacheRelation": artifact.line_cache_relation,
                 "feChunks": artifact.fe_chunks,
                 "timings": artifact.timings,
             },

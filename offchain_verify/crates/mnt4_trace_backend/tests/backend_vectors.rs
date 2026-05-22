@@ -111,4 +111,48 @@ fn writer_emits_all_stage6_json_artifacts() {
         let body = std::fs::read_to_string(&p).unwrap();
         assert!(body.contains("0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d"));
     }
+    let proof_input = std::fs::read_to_string(out.join("proof_input.json")).unwrap();
+    assert!(proof_input.contains("lineCacheRelationRoot"));
+}
+
+#[test]
+fn line_cache_relation_binds_q_to_commitments() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 1,
+        nonce: 11,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let relation = artifact.line_cache_relation.clone();
+    assert_eq!(relation.q_hash.as_deref(), artifact.q_hash.as_deref());
+    assert_eq!(relation.coeff_commitment, artifact.line_commitments.coeff_commitment);
+    assert_eq!(relation.dbl_line_commitment, artifact.line_commitments.dbl_line_commitment);
+    assert_eq!(relation.add_line_commitment, artifact.line_commitments.add_line_commitment);
+    assert_eq!(relation.miller_rounds, artifact.miller_rounds);
+    assert_eq!(relation.addition_steps_with_neg, artifact.addition_steps_with_neg);
+    mnt4_trace_backend::validate_line_cache_relation(&request, &relation).unwrap();
+}
+
+#[test]
+fn line_cache_relation_rejects_tampered_commitment() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 1,
+        nonce: 12,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let mut relation = artifact.line_cache_relation.clone();
+    relation.dbl_line_commitment = "0x0000000000000000000000000000000000000000000000000000000000000001".to_string();
+    let err = mnt4_trace_backend::validate_line_cache_relation(&request, &relation).unwrap_err();
+    assert!(err.contains("dbl_line_commitment"));
 }
