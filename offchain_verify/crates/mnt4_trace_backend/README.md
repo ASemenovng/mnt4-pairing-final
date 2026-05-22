@@ -50,3 +50,15 @@ cargo run --offline -- --out-dir ../../cache/mnt4_trace_backend/default_fixed_q
 ```
 
 If `points` is empty, the backend uses the canonical MNT4-753 G1 generator fixture. If `q` is absent in `parametric_q` mode, it uses the canonical MNT4-753 G2 generator fixture.
+
+## Stage 4: Miller relation artifact
+
+The backend now emits `MillerRelation` in addition to `LineCacheRelation`. The relation root binds:
+
+- `pointsHash`, i.e. the submitted G1 inputs;
+- `lineCacheRelationRoot`, i.e. the line cache already bound to Q;
+- `millerDigest`, the shared-accumulator Miller output digest;
+- `singlesDigest` and per-pair Miller digests for comparison paths;
+- loop shape: number of Miller doubling rounds and addition steps.
+
+The helper `validate_miller_relation(request, relation)` is an off-chain/reference validator: it rebuilds the artifact from the same request and rejects tampering. It is intentionally not an on-chain recomputation path.

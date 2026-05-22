@@ -51,3 +51,35 @@ fn line_cache_relation_breakdown_is_explicit() {
     assert_eq!(breakdown.double_steps, 377);
     assert_eq!(breakdown.addition_steps, 124);
 }
+
+#[test]
+fn miller_relation_breakdown_supports_single_and_multi_shared_accumulator() {
+    let model = RelationCostModel::default();
+    let single = mnt_cycle_constraints::miller_relation_breakdown(
+        model,
+        DEFAULT_MILLER_ROUNDS,
+        DEFAULT_ADDITION_STEPS,
+        1,
+    );
+    assert_eq!(single.shared_square_constraints, 1_508);
+    assert_eq!(single.sparse_line_constraints, 3_006);
+    assert_eq!(single.total_constraints, 4_514);
+
+    let multi2 = mnt_cycle_constraints::miller_relation_breakdown(
+        model,
+        DEFAULT_MILLER_ROUNDS,
+        DEFAULT_ADDITION_STEPS,
+        2,
+    );
+    assert_eq!(multi2.shared_square_constraints, 1_508);
+    assert_eq!(multi2.sparse_line_constraints, 6_012);
+    assert_eq!(multi2.total_constraints, 7_520);
+
+    let multi4 = mnt_cycle_constraints::miller_relation_breakdown(
+        model,
+        DEFAULT_MILLER_ROUNDS,
+        DEFAULT_ADDITION_STEPS,
+        4,
+    );
+    assert_eq!(multi4.total_constraints, 13_532);
+}

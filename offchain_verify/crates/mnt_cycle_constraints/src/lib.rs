@@ -110,6 +110,37 @@ impl Default for RelationCostModel {
     }
 }
 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MillerRelationBreakdown {
+    pub pairs: u64,
+    pub double_steps: u64,
+    pub addition_steps: u64,
+    pub shared_square_constraints: u64,
+    pub sparse_line_constraints: u64,
+    pub total_constraints: u64,
+}
+
+pub fn miller_relation_breakdown(
+    model: RelationCostModel,
+    double_steps: u64,
+    addition_steps: u64,
+    pairs: u64,
+) -> MillerRelationBreakdown {
+    let shared_square_constraints = double_steps * model.tower.fq4_sqr;
+    let sparse_line_constraints = pairs
+        * (double_steps + addition_steps)
+        * model.tower.fq4_sparse_line_mul;
+    MillerRelationBreakdown {
+        pairs,
+        double_steps,
+        addition_steps,
+        shared_square_constraints,
+        sparse_line_constraints,
+        total_constraints: shared_square_constraints + sparse_line_constraints,
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LineCacheRelationBreakdown {
     pub double_steps: u64,
@@ -158,9 +189,7 @@ pub fn estimate_pairing_relation(
 ) -> PairingRelationEstimate {
     let fq4_square_per_round = model.tower.fq4_sqr;
     let sparse_line_mul_per_round = model.tower.fq4_sparse_line_mul;
-    let miller_transition_constraints = miller_rounds
-        * (model.tower.fq4_sqr + model.tower.fq4_sparse_line_mul)
-        + addition_steps * model.tower.fq4_sparse_line_mul;
+    let miller_transition_constraints = miller_relation_breakdown(model, miller_rounds, addition_steps, 1).total_constraints;
     let line_cache_constraints = line_cache_relation_breakdown(model, miller_rounds, addition_steps).total_constraints;
     let fe_residue_constraints = 5 * model.fe_residue_segment;
     // A conservative lower-complexity reference for a direct FE chain with 753 hard-part steps.
@@ -225,6 +254,15 @@ pub fn render_markdown_report() -> String {
     writeln!(out, "| Fq4 square | {} |", tower.fq4_sqr).unwrap();
     writeln!(out, "| Fq4 sparse line multiplication | {} |", tower.fq4_sparse_line_mul).unwrap();
     let line_breakdown = line_cache_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS);
+    let miller_single = miller_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS, 1);
+    let miller_multi2 = miller_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS, 2);
+    let miller_multi4 = miller_relation_breakdown(model, DEFAULT_MILLER_ROUNDS, DEFAULT_ADDITION_STEPS, 4);
+    writeln!(out, "\n## Miller relation breakdown\n").unwrap();
+    writeln!(out, "| Scenario | Shared square constraints | Sparse line constraints | Total |").unwrap();
+    writeln!(out, "|---|---:|---:|---:|").unwrap();
+    writeln!(out, "| Single pair | {} | {} | {} |", miller_single.shared_square_constraints, miller_single.sparse_line_constraints, miller_single.total_constraints).unwrap();
+    writeln!(out, "| Multi pair, n=2 | {} | {} | {} |", miller_multi2.shared_square_constraints, miller_multi2.sparse_line_constraints, miller_multi2.total_constraints).unwrap();
+    writeln!(out, "| Multi pair, n=4 | {} | {} | {} |", miller_multi4.shared_square_constraints, miller_multi4.sparse_line_constraints, miller_multi4.total_constraints).unwrap();
     writeln!(out, "\n## Line-cache relation breakdown\n").unwrap();
     writeln!(out, "| Component | Constraints |").unwrap();
     writeln!(out, "|---|---:|").unwrap();

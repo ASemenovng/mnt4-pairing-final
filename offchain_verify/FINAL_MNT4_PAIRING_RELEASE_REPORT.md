@@ -31,7 +31,9 @@
 
 | Измерение | Constraints |
 |---|---:|
-| Miller transition relation | 4514 |
+| Miller relation, single pair | 4514 |
+| Miller relation, multi n=2 | 7520 |
+| Miller relation, multi n=4 | 13532 |
 | Line-cache relation | 19554 |
 | Final exponentiation residue relation | 110 |
 | MNT-native prepared/residue model total | 24178 |
@@ -42,12 +44,12 @@
 
 | Этап | Время, ms |
 |---|---:|
-| Генерация line cache | 178 |
-| Генерация Miller trace | 217 |
-| Final exponentiation | 19 |
+| Генерация line cache | 176 |
+| Генерация Miller trace | 211 |
+| Final exponentiation | 18 |
 | Генерация proof input | 0 |
-| Total reported generation | 415 |
-| Wall time Rust-команды | 878 |
+| Total reported generation | 407 |
+| Wall time Rust-команды | 811 |
 
 ## Проверки корректности
 

@@ -1,20 +1,20 @@
 {
   "rust_backend": {
-    "command_ms": 878,
+    "command_ms": 811,
     "reported_timings": {
-      "final_exponentiation_ms": 19,
+      "final_exponentiation_ms": 18,
       "input_normalization_ms": 0,
-      "line_cache_generation_ms": 178,
-      "miller_trace_generation_ms": 217,
+      "line_cache_generation_ms": 176,
+      "miller_trace_generation_ms": 211,
       "proof_input_generation_ms": 0,
-      "total_generation_ms": 415
+      "total_generation_ms": 407
     },
     "pairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
     "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
     "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47"
   },
   "proof": {
-    "generation_command_ms": 385,
+    "generation_command_ms": 354,
     "proof_bytes": 256,
     "public_inputs": 19,
     "claimedPairingDigest": "0x792f0eb69a2d7c2b4fabd0fcca4e0a74b47e4c40dfe58f83ec8ef1615f1c832d",
@@ -30,27 +30,30 @@
     "labels": 1567
   },
   "mnt_cycle_constraints": {
-    "report_generation_ms": 306,
+    "report_generation_ms": 293,
     "native_prepared_residue_constraints": 24178,
     "native_direct_fe_reference_constraints": 30845,
     "bn254_emulated_pairing_reference_constraints": 1393318,
     "sonobe_decider_reference_constraints": 9000000,
     "miller_transition_constraints": 4514,
+    "miller_single_constraints": 4514,
+    "miller_multi2_constraints": 7520,
+    "miller_multi4_constraints": 13532,
     "line_cache_relation_constraints": 19554,
     "final_exponentiation_residue_constraints": 110
   },
   "gas": {
+    "testNeutralCheckerBindsStatementHash": 336102,
+    "testNeutralCheckerRejectsTamperedSignal": 325321,
+    "testRealProofFixtureVerifiesThroughNeutralChecker": 325283,
+    "testEmptyInputReturnsTrueInBothPaths": 145937,
+    "testSingleValidGeneratorPairReturnsSameBoolean": 2006992,
     "testVerifyMultiPairingAcceptsBoundStatement": 37134,
     "testVerifyMultiPairingRejectsLengthMismatch": 15003,
     "testVerifyMultiPairingRejectsTooManyPairs": 38378,
     "testVerifySinglePairingAcceptsBoundStatement": 22003,
     "testVerifySinglePairingRejectsBadLineCommitment": 13454,
     "testVerifySinglePairingRejectsTamperedResult": 27164,
-    "testNeutralCheckerBindsStatementHash": 336102,
-    "testNeutralCheckerRejectsTamperedSignal": 325321,
-    "testRealProofFixtureVerifiesThroughNeutralChecker": 325283,
-    "testEmptyInputReturnsTrueInBothPaths": 145937,
-    "testSingleValidGeneratorPairReturnsSameBoolean": 2006992,
     "testFinalMainContractRejectsTamperedFinalExponentiationCommitment": 25164,
     "testFinalMainContractRejectsTamperedLineCommitment": 24329,
     "testFinalMainContractRejectsTamperedMillerTraceCommitment": 25150,
@@ -62,8 +65,8 @@
     "testFinalFolderFq2ArithmeticMatchesArkworks": 2983507,
     "testFinalFolderFq4ArithmeticMatchesArkworks": 3184866,
     "testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet": 259719954,
-    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1994979,
-    "testFuzzWrapperMatchesRawPrecompileBoolean_median": 2009894
+    "testFuzzWrapperMatchesRawPrecompileBoolean_mean": 1987514,
+    "testFuzzWrapperMatchesRawPrecompileBoolean_median": 2009879
   },
   "artifacts": {
     "rust_output_dir": "cache/final_mnt4_pairing/rust_backend_smoke",

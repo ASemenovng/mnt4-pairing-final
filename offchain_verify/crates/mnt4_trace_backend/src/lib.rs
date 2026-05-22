@@ -79,6 +79,20 @@ pub struct LineCacheRelation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MillerRelation {
+    pub relation_root: String,
+    pub points_hash: String,
+    pub line_cache_relation_root: String,
+    pub miller_digest: String,
+    pub singles_digest: String,
+    pub pair_miller_digests: Vec<String>,
+    pub pairs: u64,
+    pub miller_rounds: u32,
+    pub addition_steps_with_neg: u32,
+    pub shared_accumulator: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeChunks {
     pub inv_out0: String,
     pub first_chunk_out0: String,
@@ -117,6 +131,7 @@ pub struct PairingArtifact {
     pub points_hash: String,
     pub line_commitments: LineCommitments,
     pub line_cache_relation: LineCacheRelation,
+    pub miller_relation: MillerRelation,
     pub pairing_digest: String,
     pub miller_digest: String,
     pub singles_digest: String,
@@ -253,10 +268,18 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
 
     let proof_input_started = Instant::now();
     let pairing_digest = fe_chunks.final_digest.clone();
+    let pairs = points.len() as u64;
     let miller_digest = digest_fq4_mont(&miller);
     let singles_digest = digest_fq4_mont(&singles);
+    let miller_relation = build_miller_relation(
+        &points_hash,
+        &line_cache_relation,
+        &miller_digest,
+        &singles_digest,
+        &pair_miller_digests,
+        pairs,
+    )?;
     let context = parse_bytes32(&request.context)?;
-    let pairs = points.len() as u64;
     let transition_root = keccak(&abi_encode_words(&[
         hex_to_word(&miller_digest)?,
         hex_to_word(&singles_digest)?,
@@ -298,6 +321,7 @@ pub fn build_artifact(request: &TraceRequest) -> Result<PairingArtifact, String>
         points_hash,
         line_commitments,
         line_cache_relation,
+        miller_relation,
         pairing_digest,
         miller_digest,
         singles_digest,
@@ -419,6 +443,93 @@ fn line_cache_relation_root(
     Ok(keccak(&abi_encode_words(&words)))
 }
 
+
+pub fn validate_miller_relation(
+    request: &TraceRequest,
+    relation: &MillerRelation,
+) -> Result<(), String> {
+    let expected = build_artifact(request)?.miller_relation;
+    compare_line_cache_field("relation_root", &relation.relation_root, &expected.relation_root)?;
+    compare_line_cache_field("points_hash", &relation.points_hash, &expected.points_hash)?;
+    compare_line_cache_field(
+        "line_cache_relation_root",
+        &relation.line_cache_relation_root,
+        &expected.line_cache_relation_root,
+    )?;
+    compare_line_cache_field("miller_digest", &relation.miller_digest, &expected.miller_digest)?;
+    compare_line_cache_field("singles_digest", &relation.singles_digest, &expected.singles_digest)?;
+    if relation.pair_miller_digests != expected.pair_miller_digests {
+        return Err("pair_miller_digests mismatch".to_string());
+    }
+    if relation.pairs != expected.pairs {
+        return Err(format!("pairs mismatch: got {}, expected {}", relation.pairs, expected.pairs));
+    }
+    if relation.miller_rounds != expected.miller_rounds {
+        return Err(format!("miller_rounds mismatch: got {}, expected {}", relation.miller_rounds, expected.miller_rounds));
+    }
+    if relation.addition_steps_with_neg != expected.addition_steps_with_neg {
+        return Err(format!("addition_steps_with_neg mismatch: got {}, expected {}", relation.addition_steps_with_neg, expected.addition_steps_with_neg));
+    }
+    if relation.shared_accumulator != expected.shared_accumulator {
+        return Err(format!("shared_accumulator mismatch: got {}, expected {}", relation.shared_accumulator, expected.shared_accumulator));
+    }
+    Ok(())
+}
+
+fn build_miller_relation(
+    points_hash: &str,
+    line_cache_relation: &LineCacheRelation,
+    miller_digest: &str,
+    singles_digest: &str,
+    pair_miller_digests: &[String],
+    pairs: u64,
+) -> Result<MillerRelation, String> {
+    let relation_root = miller_relation_root(
+        points_hash,
+        line_cache_relation,
+        miller_digest,
+        singles_digest,
+        pair_miller_digests,
+        pairs,
+    )?;
+    Ok(MillerRelation {
+        relation_root: hex32(&relation_root),
+        points_hash: points_hash.to_string(),
+        line_cache_relation_root: line_cache_relation.relation_root.clone(),
+        miller_digest: miller_digest.to_string(),
+        singles_digest: singles_digest.to_string(),
+        pair_miller_digests: pair_miller_digests.to_vec(),
+        pairs,
+        miller_rounds: line_cache_relation.miller_rounds,
+        addition_steps_with_neg: line_cache_relation.addition_steps_with_neg,
+        shared_accumulator: true,
+    })
+}
+
+fn miller_relation_root(
+    points_hash: &str,
+    line_cache_relation: &LineCacheRelation,
+    miller_digest: &str,
+    singles_digest: &str,
+    pair_miller_digests: &[String],
+    pairs: u64,
+) -> Result<[u8; 32], String> {
+    let mut words = Vec::with_capacity(10 + pair_miller_digests.len());
+    words.push(keccak(b"MNT4_MILLER_RELATION_V1"));
+    words.push(parse_word(points_hash)?);
+    words.push(parse_word(&line_cache_relation.relation_root)?);
+    words.push(parse_word(miller_digest)?);
+    words.push(parse_word(singles_digest)?);
+    words.push(uint64_word(pairs));
+    words.push(uint64_word(line_cache_relation.miller_rounds as u64));
+    words.push(uint64_word(line_cache_relation.addition_steps_with_neg as u64));
+    words.push(uint64_word(1));
+    for digest in pair_miller_digests {
+        words.push(parse_word(digest)?);
+    }
+    Ok(keccak(&abi_encode_words(&words)))
+}
+
 pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(), String> {
     fs::create_dir_all(out_dir).map_err(|e| e.to_string())?;
     write_json(out_dir.join("trace.json"), artifact)?;
@@ -431,6 +542,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "feChunks": artifact.fe_chunks,
             "lineCommitments": artifact.line_commitments,
             "lineCacheRelation": artifact.line_cache_relation,
+            "millerRelation": artifact.miller_relation,
             "timings": artifact.timings,
         }),
     )?;
@@ -448,6 +560,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
             "pointsHash": artifact.points_hash,
             "coeffCommitment": artifact.line_commitments.coeff_commitment,
             "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
+            "millerRelationRoot": artifact.miller_relation.relation_root,
             "pairingDigest": artifact.pairing_digest,
             "millerDigest": artifact.miller_digest,
             "singlesDigest": artifact.singles_digest,
@@ -471,6 +584,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "pairMillerDigests": artifact.pair_miller_digests,
                 "coeffCommitment": artifact.line_commitments.coeff_commitment,
                 "lineCacheRelationRoot": artifact.line_cache_relation.relation_root,
+                "millerRelationRoot": artifact.miller_relation.relation_root,
                 "qHash": artifact.q_hash,
                 "pointsHash": artifact.points_hash,
             },
@@ -480,6 +594,7 @@ pub fn write_artifacts(out_dir: &Path, artifact: &PairingArtifact) -> Result<(),
                 "pairMillerDigests": artifact.pair_miller_digests,
                 "lineCommitments": artifact.line_commitments,
                 "lineCacheRelation": artifact.line_cache_relation,
+                "millerRelation": artifact.miller_relation,
                 "feChunks": artifact.fe_chunks,
                 "timings": artifact.timings,
             },

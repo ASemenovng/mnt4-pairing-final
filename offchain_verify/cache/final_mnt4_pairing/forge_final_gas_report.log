@@ -1,5 +1,17 @@
 No files changed, compilation skipped
 
+Ran 3 tests for test/final_mnt4_pairing/MNT4PairingProofChecker.t.sol:MNT4PairingProofCheckerTest
+[PASS] testNeutralCheckerBindsStatementHash() (gas: 336102)
+[PASS] testNeutralCheckerRejectsTamperedSignal() (gas: 325321)
+[PASS] testRealProofFixtureVerifiesThroughNeutralChecker() (gas: 325283)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 4.28ms (10.94ms CPU time)
+
+Ran 3 tests for test/final_mnt4_pairing/BN254PrecompileBoolFuzz.t.sol:BN254PrecompileBoolFuzzTest
+[PASS] testEmptyInputReturnsTrueInBothPaths() (gas: 145937)
+[PASS] testFuzzWrapperMatchesRawPrecompileBoolean(bytes) (runs: 256, μ: 1987514, ~: 2009879)
+[PASS] testSingleValidGeneratorPairReturnsSameBoolean() (gas: 2006992)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 7.91ms (7.89ms CPU time)
+
 Ran 6 tests for test/final_mnt4_pairing/MNT4PairingVerifier.t.sol:MNT4PairingVerifierTest
 [PASS] testVerifyMultiPairingAcceptsBoundStatement() (gas: 37134)
 [PASS] testVerifyMultiPairingRejectsLengthMismatch() (gas: 15003)
@@ -7,19 +19,7 @@ Ran 6 tests for test/final_mnt4_pairing/MNT4PairingVerifier.t.sol:MNT4PairingVer
 [PASS] testVerifySinglePairingAcceptsBoundStatement() (gas: 22003)
 [PASS] testVerifySinglePairingRejectsBadLineCommitment() (gas: 13454)
 [PASS] testVerifySinglePairingRejectsTamperedResult() (gas: 27164)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 783.13µs (716.42µs CPU time)
-
-Ran 3 tests for test/final_mnt4_pairing/MNT4PairingProofChecker.t.sol:MNT4PairingProofCheckerTest
-[PASS] testNeutralCheckerBindsStatementHash() (gas: 336102)
-[PASS] testNeutralCheckerRejectsTamperedSignal() (gas: 325321)
-[PASS] testRealProofFixtureVerifiesThroughNeutralChecker() (gas: 325283)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 4.64ms (10.01ms CPU time)
-
-Ran 3 tests for test/final_mnt4_pairing/BN254PrecompileBoolFuzz.t.sol:BN254PrecompileBoolFuzzTest
-[PASS] testEmptyInputReturnsTrueInBothPaths() (gas: 145937)
-[PASS] testFuzzWrapperMatchesRawPrecompileBoolean(bytes) (runs: 256, μ: 1994979, ~: 2009894)
-[PASS] testSingleValidGeneratorPairReturnsSameBoolean() (gas: 2006992)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 11.10ms (7.56ms CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 12.42ms (1.21ms CPU time)
 
 Ran 7 tests for test/final_mnt4_pairing/MNT4PairingFinalE2E.t.sol:MNT4PairingFinalE2ETest
 [PASS] testFinalMainContractRejectsTamperedFinalExponentiationCommitment() (gas: 25164)
@@ -29,14 +29,14 @@ Ran 7 tests for test/final_mnt4_pairing/MNT4PairingFinalE2E.t.sol:MNT4PairingFin
 [PASS] testFinalMainContractRejectsTamperedQ() (gas: 26005)
 [PASS] testFinalMainContractRejectsTamperedResultDigest() (gas: 24055)
 [PASS] testFinalMainContractVerifiesRealProofEnvelope() (gas: 343435)
-Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 588.53ms (5.17ms CPU time)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 12.53ms (4.08ms CPU time)
 
 Ran 4 tests for test/final_mnt4_pairing/MNT4FinalArkworksCrossCheck.t.sol:MNT4FinalArkworksCrossCheckTest
 [PASS] testFinalFolderFpArithmeticMatchesArkworks() (gas: 2913414)
 [PASS] testFinalFolderFq2ArithmeticMatchesArkworks() (gas: 2983507)
 [PASS] testFinalFolderFq4ArithmeticMatchesArkworks() (gas: 3184866)
 [PASS] testFinalFolderParametricQPairingDigestMatchesArkworksConventionSet() (gas: 259719954)
-Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 588.51ms (621.34ms CPU time)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 569.26ms (600.72ms CPU time)
 
 ╭-----------------------------------------------------------------------+-----------------+-------+--------+--------+---------╮
 | src/final_mnt4_pairing/MNT4PairingFinal.sol:MNT4PairingFinal Contract |                 |       |        |        |         |
@@ -127,7 +127,7 @@ Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 588.51ms (621.34ms 
 |----------------------------------------------------------------------------------------------+-----------------+--------+---------+---------+---------|
 | Function Name                                                                                | Min             | Avg    | Median  | Max     | # Calls |
 |----------------------------------------------------------------------------------------------+-----------------+--------+---------+---------+---------|
-| verify                                                                                       | 45814           | 986040 | 1000787 | 1000847 | 259     |
+| verify                                                                                       | 45814           | 982351 | 1000781 | 1000847 | 259     |
 ╰----------------------------------------------------------------------------------------------+-----------------+--------+---------+---------+---------╯
 
 ╭------------------------------------------------------------------------------------------------+-----------------+-----------+-----------+-----------+---------╮
@@ -169,4 +169,4 @@ Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 588.51ms (621.34ms 
 ╰------------------------------------------------------------------------------------------------+-----------------+-----------+-----------+-----------+---------╯
 
 
-Ran 5 test suites in 589.78ms (1.19s CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)
+Ran 5 test suites in 570.10ms (606.39ms CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)

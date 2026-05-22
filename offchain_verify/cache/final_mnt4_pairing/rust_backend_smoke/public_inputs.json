@@ -6,6 +6,7 @@
   "fixedQId": null,
   "lineCacheRelationRoot": "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
   "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+  "millerRelationRoot": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
   "millerRounds": 376,
   "mode": "parametric_q",
   "nonce": 0,
@@ -18,12 +19,12 @@
   "qHash": "0x6b2368d6280cd7d2aff79fdd38c011f62151009f1c0266c453a4da2bd5b3bda7",
   "singlesDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
   "timings": {
-    "final_exponentiation_ms": 19,
+    "final_exponentiation_ms": 18,
     "input_normalization_ms": 0,
-    "line_cache_generation_ms": 178,
-    "miller_trace_generation_ms": 217,
+    "line_cache_generation_ms": 176,
+    "miller_trace_generation_ms": 211,
     "proof_input_generation_ms": 0,
-    "total_generation_ms": 415
+    "total_generation_ms": 407
   },
   "traceRoot": "0x03c54144794a78ef6fdeaf16bed72215ec0e4bfd7de84269f2d6a410e55c7a47",
   "transitionRoot": "0xeeb82b8a18a570bfe0e127698860ce15b788161204f7d9b75e047b59693459ac",

@@ -75,6 +75,9 @@ def parse_mnt_cycle_report(text: str) -> dict[str, int]:
         "bn254_emulated_pairing_reference_constraints": r"BN254 emulated pairing reference \| (\d+) \|",
         "sonobe_decider_reference_constraints": r"Sonobe-like Ethereum decider reference \| (\d+) \|",
         "miller_transition_constraints": r"Miller transition relation, .* \| (\d+) \|",
+        "miller_single_constraints": r"Single pair \| \d+ \| \d+ \| (\d+) \|",
+        "miller_multi2_constraints": r"Multi pair, n=2 \| \d+ \| \d+ \| (\d+) \|",
+        "miller_multi4_constraints": r"Multi pair, n=4 \| \d+ \| \d+ \| (\d+) \|",
         "line_cache_relation_constraints": r"Line-cache relation \| (\d+) \|",
         "final_exponentiation_residue_constraints": r"Final exponentiation residue relation, .* \| (\d+) \|",
     }
@@ -208,7 +211,9 @@ def main() -> int:
 
 | Измерение | Constraints |
 |---|---:|
-| Miller transition relation | {summary['mnt_cycle_constraints'].get('miller_transition_constraints', 'n/a')} |
+| Miller relation, single pair | {summary['mnt_cycle_constraints'].get('miller_single_constraints', 'n/a')} |
+| Miller relation, multi n=2 | {summary['mnt_cycle_constraints'].get('miller_multi2_constraints', 'n/a')} |
+| Miller relation, multi n=4 | {summary['mnt_cycle_constraints'].get('miller_multi4_constraints', 'n/a')} |
 | Line-cache relation | {summary['mnt_cycle_constraints'].get('line_cache_relation_constraints', 'n/a')} |
 | Final exponentiation residue relation | {summary['mnt_cycle_constraints'].get('final_exponentiation_residue_constraints', 'n/a')} |
 | MNT-native prepared/residue model total | {summary['mnt_cycle_constraints'].get('native_prepared_residue_constraints', 'n/a')} |

@@ -156,3 +156,66 @@ fn line_cache_relation_rejects_tampered_commitment() {
     let err = mnt4_trace_backend::validate_line_cache_relation(&request, &relation).unwrap_err();
     assert!(err.contains("dbl_line_commitment"));
 }
+
+#[test]
+fn miller_relation_binds_points_line_cache_and_accumulator() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 2,
+        nonce: 21,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let relation = artifact.miller_relation.clone();
+    assert_eq!(relation.points_hash, artifact.points_hash);
+    assert_eq!(relation.line_cache_relation_root, artifact.line_cache_relation.relation_root);
+    assert_eq!(relation.miller_digest, artifact.miller_digest);
+    assert_eq!(relation.singles_digest, artifact.singles_digest);
+    assert_eq!(relation.pair_miller_digests, artifact.pair_miller_digests);
+    assert_eq!(relation.pairs, artifact.pairs);
+    assert_eq!(relation.miller_rounds, artifact.miller_rounds);
+    assert_eq!(relation.addition_steps_with_neg, artifact.addition_steps_with_neg);
+    mnt4_trace_backend::validate_miller_relation(&request, &relation).unwrap();
+}
+
+#[test]
+fn miller_relation_rejects_tampered_miller_digest() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 2,
+        nonce: 22,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let mut relation = artifact.miller_relation.clone();
+    relation.miller_digest = "0x0000000000000000000000000000000000000000000000000000000000000002".to_string();
+    let err = mnt4_trace_backend::validate_miller_relation(&request, &relation).unwrap_err();
+    assert!(err.contains("miller_digest"));
+}
+
+#[test]
+fn miller_relation_rejects_tampered_line_cache_root() {
+    let request = TraceRequest {
+        mode: BackendMode::ParametricQ,
+        points: vec![],
+        q: None,
+        context: DEFAULT_CONTEXT_HEX.to_string(),
+        epoch: 2,
+        nonce: 23,
+        valid_until: 0,
+        fixed_q_id: None,
+    };
+    let artifact = build_artifact(&request).unwrap();
+    let mut relation = artifact.miller_relation.clone();
+    relation.line_cache_relation_root = "0x0000000000000000000000000000000000000000000000000000000000000003".to_string();
+    let err = mnt4_trace_backend::validate_miller_relation(&request, &relation).unwrap_err();
+    assert!(err.contains("line_cache_relation_root"));
+}

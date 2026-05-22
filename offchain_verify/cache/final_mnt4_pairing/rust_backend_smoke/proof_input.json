@@ -35,22 +35,37 @@
     },
     "millerOut00": "0x054116151d0190c3f35d22f1885bd5a299f0e91af816be581fd1b1ccaf640153",
     "millerOut11": "0x1491b73df47d86e5643f95b1f8bb0d473f9596c83b54f3733f773626117045ea",
+    "millerRelation": {
+      "addition_steps_with_neg": 124,
+      "line_cache_relation_root": "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
+      "miller_digest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+      "miller_rounds": 376,
+      "pair_miller_digests": [
+        "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
+      ],
+      "pairs": 1,
+      "points_hash": "0xa853d1c8b8679e23cd305235b91951dd6cca2db02227336cb15cb7ffe2348858",
+      "relation_root": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
+      "shared_accumulator": true,
+      "singles_digest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
+    },
     "pairMillerDigests": [
       "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
     ],
     "timings": {
-      "final_exponentiation_ms": 19,
+      "final_exponentiation_ms": 18,
       "input_normalization_ms": 0,
-      "line_cache_generation_ms": 178,
-      "miller_trace_generation_ms": 217,
+      "line_cache_generation_ms": 176,
+      "miller_trace_generation_ms": 211,
       "proof_input_generation_ms": 0,
-      "total_generation_ms": 415
+      "total_generation_ms": 407
     }
   },
   "public": {
     "coeffCommitment": "0xdc70fe833c6bd71c7b8144166e9b94c3393a4d37a52b1497fc3e34180a3cd843",
     "lineCacheRelationRoot": "0xe429001bc805f56c1ee60d0a1a944469f8909dc41f851b35ffaef09bc5cb1e99",
     "millerDigest": "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934",
+    "millerRelationRoot": "0xe4d856950fae10a6cebe4eec166088df4beea5f4be940fb0f70fef8de85e9895",
     "pairMillerDigests": [
       "0xb5bfca0deaab5483050fa32bb2a3f15f51a2ca8dcf3f4aabd2c6e35261f5a934"
     ],
